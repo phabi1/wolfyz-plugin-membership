@@ -28,7 +28,13 @@ class Admin
         $mfile = include(plugin_dir_path(__FILE__) . '../build/admin/index.asset.php');
 
         //enqueue the react built script
-        wp_enqueue_script('wolf-events-admin', plugin_dir_url(__DIR__) . '/build/admin/index.js', $mfile['dependencies'], $mfile['version'], true);
+        wp_enqueue_script('wolf-membership-admin', plugin_dir_url(__DIR__) . '/build/admin/index.js', $mfile['dependencies'], $mfile['version'], true);
+
+        wp_set_script_translations(
+            'wolf-membership-admin',
+            'wolf-membership',
+            WOLF_MEMBERSHIP_PLUGIN_DIR . 'languages'
+        );
 
         echo '<div id="app"></div>';
     }

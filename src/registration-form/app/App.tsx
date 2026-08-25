@@ -11,39 +11,12 @@ import Typography from "@mui/material/Typography";
 import { ParticipantsStep } from "./steps/ParticipantsStep";
 import { ContactStep } from "./steps/ContactStep";
 import { ReviewStep } from "./steps/ReviewStep";
-import { isParticipantMinor } from "./helpers";
+import { isParticipantMinor, isValidParticipant } from "./helpers";
 import { TEXT_DOMAIN } from "./utils";
-
-const emptyParticipant = () => ({
-    firstname: "",
-    lastname: "",
-    birthdate: "",
-    lesson_id: "",
-    license_type: "hobby",
-    address: {
-        line1: "",
-        line2: "",
-        zipcode: "",
-        city: "",
-        country: "",
-    },
-    tutor1: {
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-    },
-    tutor2: {
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-    },
-    health_questionnaire: null,
-    identity_photo: null,
-    medical_certificate: null,
-    comment: "",
-});
+import { emptyParticipant, Participant } from "./models/participant";
+import { emptyTutor } from "./models/tutor";
+import { emptyAddress } from "./models/address";
+import { Contact, emptyContact } from "./models/contact";
 
 export default function App({ campaignId, requestId, token }: { campaignId: string; requestId?: string; token?: string }) {
     const [loading, setLoading] = useState(true);
@@ -52,20 +25,17 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
     const [success, setSuccess] = useState(false);
     const [step, setStep] = useState(0);
     const [registration, setRegistration] = useState({ lessons: [] });
-    const [participants, setParticipants] = useState([emptyParticipant()]);
+    const [participants, setParticipants] = useState<Participant[]>([emptyParticipant()]);
     const [selectedParticipantIndex, setSelectedParticipantIndex] = useState(0);
     const [totalToPay, setTotalToPay] = useState(0);
-    const [pricingBreakdown, setPricingBreakdown] = useState([]);
-    const [contact, setContact] = useState({
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-        notes: "",
-    });
+    const [contact, setContact] = useState<Contact>(emptyContact());
 
     useEffect(() => {
-        const url = `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration?request_id=${requestId}&token=${token}`;
+
+        let url = `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration`;
+        if (requestId && token) {
+            url += `?request_id=${requestId}&token=${token}`;
+        }
 
         fetch(url)
             .then((response) => {
@@ -106,25 +76,11 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
                             firstname: participant.firstname,
                             lastname: participant.lastname,
                             birthdate: participant.birthdate,
-                            address: {
-                                line1: participant.address?.line1 || "",
-                                line2: participant.address?.line2 || "",
-                                zipcode: participant.address?.zipcode || "",
-                                city: participant.address?.city || "",
-                                country: participant.address?.country || "",
-                            },
-                            tutor1: participant.tutor1 || {
-                                firstname: "",
-                                lastname: "",
-                                email: "",
-                                phone: "",
-                            },
-                            tutor2: participant.tutor2 || {
-                                firstname: "",
-                                lastname: "",
-                                email: "",
-                                phone: "",
-                            },
+                            gender: participant.gender,
+                            nationality: participant.nationality,
+                            address: participant.address || emptyAddress(),
+                            tutor1: participant.tutor1 || emptyTutor(),
+                            tutor2: participant.tutor2 || emptyTutor(),
                             lesson_id: participant.lesson_id
                                 ? Number(participant.lesson_id)
                                 : "",
@@ -139,6 +95,8 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
                             medical_certificate: participant.medical_certificate
                                 ? participant.medical_certificate
                                 : null,
+                            agree_photo: participant.agree_photo || false,
+                            agree_exit: participant.agree_exit || false,
                         })),
                     }),
                 },
@@ -154,9 +112,6 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
 
             const data = await response.json().catch(() => ({}));
             setTotalToPay(Number(data.total_amount ?? 0));
-            setPricingBreakdown(
-                Array.isArray(data.pricing_breakdown) ? data.pricing_breakdown : [],
-            );
             return Number(data.total_amount ?? 0);
         } catch (err: any) {
             setError(
@@ -216,82 +171,16 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
         setSelectedParticipantIndex(Math.max(0, nextParticipants.length - 1));
     };
 
-    const canGoToContact = useMemo<boolean>(() => participants.every((participant) => {
-        const basicInfo =
-            !!participant.firstname &&
-            !!participant.lastname &&
-            !!participant.birthdate &&
-            !!participant.lesson_id;
-
-        const minorInfo =
-            !isParticipantMinor(participant.birthdate) ||
-            !!(participant.tutor1 &&
-                participant.tutor1.firstname &&
-                participant.tutor1.lastname &&
-                participant.tutor1.email &&
-                participant.tutor1.phone &&
-                participant.tutor2 &&
-                participant.tutor2.firstname &&
-                participant.tutor2.lastname &&
-                participant.tutor2.email &&
-                participant.tutor2.phone);
-
-        if (participant.license_type === "hobby") {
-            return basicInfo && minorInfo && !!participant.health_questionnaire;
-        }
-
-        if (participant.license_type === "competition") {
-            return (
-                basicInfo &&
-                minorInfo &&
-                !!participant.identity_photo &&
-                !!participant.medical_certificate
-            );
-        }
-
-        return basicInfo && minorInfo;
-    }), [participants]);
+    const canGoToContact = useMemo<boolean>(() => participants.every((participant) =>
+        isValidParticipant(participant)
+    ), [participants]);
 
     const canGoToReviews = useMemo<boolean>(() =>
         !!contact.firstname &&
         !!contact.lastname &&
         !!contact.email &&
         !!contact.phone &&
-        participants.every((participant) => {
-            const basicInfo =
-                !!participant.firstname &&
-                !!participant.lastname &&
-                !!participant.birthdate &&
-                !!participant.lesson_id;
-
-            const minorInfo =
-                !isParticipantMinor(participant.birthdate) ||
-                !!(participant.tutor1 &&
-                    participant.tutor1.firstname &&
-                    participant.tutor1.lastname &&
-                    participant.tutor1.email &&
-                    participant.tutor1.phone &&
-                    participant.tutor2 &&
-                    participant.tutor2.firstname &&
-                    participant.tutor2.lastname &&
-                    participant.tutor2.email &&
-                    participant.tutor2.phone);
-
-            if (participant.license_type === "hobby") {
-                return basicInfo && minorInfo && !!participant.health_questionnaire;
-            }
-
-            if (participant.license_type === "competition") {
-                return (
-                    basicInfo &&
-                    minorInfo &&
-                    !!participant.identity_photo &&
-                    !!participant.medical_certificate
-                );
-            }
-
-            return basicInfo && minorInfo;
-        }), [contact, participants]);
+        participants.every((participant) => isValidParticipant(participant)), [contact, participants]);
 
     const handleNext = () => {
         if (!canGoToContact) {

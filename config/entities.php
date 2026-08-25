@@ -106,6 +106,27 @@ return [
             'campaign_id' => ['type' => Field::TYPE_INTEGER, 'required' => true],
         ],
     ],
+    'wolf-memberships.request_log' => [
+        'table' => 'wolf_memberships_request_log',
+        'fields' => [
+            'id' => ['type' => Field::TYPE_INTEGER],
+            'request_id' => ['type' => Field::TYPE_INTEGER, 'required' => true],
+            'status' => ['type' => Field::TYPE_STRING, 'required' => true],
+            'params' => ['type' => Field::TYPE_JSON, 'nullable' => true],
+            'changed_at' => ['type' => Field::TYPE_DATETIME, 'required' => true],
+            'changed_by' => ['type' => Field::TYPE_STRING, 'nullable' => true],
+            'created_at' => ['type' => Field::TYPE_DATETIME, 'required' => true],
+        ],
+        'relations' => [
+            'request' => [
+                'type' => Relation::TYPE_ONE_TO_ONE,
+                'target_entity' => 'wolf-memberships.request',
+                'options' => [
+                    'join_field' => 'request_id'
+                ]
+            ]
+        ]
+    ],
     'wolf-memberships.subscription' => [
         'table' => 'wolf_memberships_subscription',
         'fields' => [
@@ -171,6 +192,7 @@ return [
         ]
     ],
     'wolf-memberships.session' => [
+        'repository' => Wolf\Memberships\Entity\Repository\SessionEntityRepository::class,
         'table' => 'wolf_memberships_session',
         'fields' => [
             'id' => ['type' => Field::TYPE_INTEGER],

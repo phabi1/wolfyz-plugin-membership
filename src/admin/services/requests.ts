@@ -1,4 +1,5 @@
 import { Request } from "../models/request";
+import { RequestHistoryItem } from "../models/request-history";
 
 class RequestService {
   private endpoint = "/wp-json/wolf-memberships/v1/campaigns";
@@ -59,9 +60,13 @@ class RequestService {
       },
     );
   }
-  async reject(campaignId: string, requestId: string) {
+  async reject(campaignId: string, requestId: string, reason: string = "") {
     await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/reject`, {
       method: "POST",
+      body: JSON.stringify({ reason }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
   async paid(campaignId: string, requestId: string) {
@@ -74,6 +79,18 @@ class RequestService {
     await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/cancel`, {
       method: "POST",
     });
+  }
+
+  async history(
+    campaignId: string,
+    requestId: string,
+  ): Promise<RequestHistoryItem[]> {
+    const res = await fetch(
+      `${this.endpoint}/${campaignId}/requests/${requestId}/history`,
+    );
+    const data = await res.json();
+
+    return data.data;
   }
 
   private serialize(data: any) {

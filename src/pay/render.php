@@ -60,9 +60,10 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 		return;
 	}
 
+	$externalId = 'membership:' . $campaign->id . ':' . $request->id;
+
 	if ($paymentMethod === 'credit_card') {
 		$amount = (int) $pay['total_amount'];
-		$amount = 3000;
 
 		$paymentMethod = sanitize_text_field($_GET['payment_method']);
 		$res = $useCaseBus->execute('wolf-billing.create_payment', [
@@ -75,7 +76,7 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 				'last_name' => $request->lastname,
 				'email' => $request->email
 			],
-			'metadata' => ['external_id' => 'request:' . $request->id]
+			'metadata' => ['external_id' => $externalId]
 		]);
 	} elseif ($paymentMethod === 'credit_card_x3') {
 
@@ -130,7 +131,7 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 				'email' => $request->email
 			],
 			'items' => $terms,
-			'metadata' => ['external_id' => 'request:' . $request->id]
+			'metadata' => ['external_id' => $externalId]
 		]);
 	} elseif ($paymentMethod === 'bank_transfer') {
 		$amount = (int) $pay['total_amount'];
@@ -144,7 +145,7 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 				'last_name' => $request->lastname,
 				'email' => $request->email
 			],
-			'metadata' => ['external_id' => 'request:' . $request->id]
+			'metadata' => ['external_id' => $externalId]
 		]);
 	} elseif ($paymentMethod === 'check') {
 		$amount = (int) $pay['total_amount'];
@@ -158,7 +159,7 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 				'last_name' => $request->lastname,
 				'email' => $request->email
 			],
-			'metadata' => ['external_id' => 'request:' . $request->id]
+			'metadata' => ['external_id' => $externalId]
 		]);
 	} else {
 		echo '<p>' . esc_html__('Invalid payment method.', 'wolf-membership') . '</p>';

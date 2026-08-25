@@ -1,8 +1,10 @@
-import { __ } from "@wordpress/i18n";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { __ } from "@wordpress/i18n";
 
 const TEXT_DOMAIN = "wolf-membership";
 
@@ -20,59 +22,65 @@ export function ContactStep({ contact, onChangeContact, onBack, onNext, canNext 
   canNext: boolean;
 }) {
   return (
-    <Box>
-      <Typography variant="subtitle1" gutterBottom>
-        {__("Contact Information", TEXT_DOMAIN)}
-      </Typography>
+    <>
+      <Card variant="outlined" sx={{ p: 3 }}>
+        <CardContent>
+          <Box>
+            <Typography variant="subtitle1" gutterBottom>
+              {__("Contact Information", TEXT_DOMAIN)}
+            </Typography>
 
-      <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }} gap={2}>
-        <TextField
-          label={__("First Name", TEXT_DOMAIN)}
-          value={contact.firstname}
-          onChange={(event) => onChangeContact("firstname", event.target.value)}
-          fullWidth
-          required
-        />
-        <TextField
-          label={__("Last Name", TEXT_DOMAIN)}
-          value={contact.lastname}
-          onChange={(event) => onChangeContact("lastname", event.target.value)}
-          fullWidth
-          required
-        />
-        <TextField
-          label={__("Email", TEXT_DOMAIN)}
-          type="email"
-          value={contact.email}
-          onChange={(event) => onChangeContact("email", event.target.value)}
-          fullWidth
-          required
-        />
-        <TextField
-          label={__("Phone", TEXT_DOMAIN)}
-          value={contact.phone}
-          onChange={(event) => onChangeContact("phone", event.target.value)}
-          fullWidth
-          required
-        />
-      </Box>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              <TextField
+                label={__("First Name", TEXT_DOMAIN)}
+                value={contact.firstname}
+                onChange={(event) => onChangeContact("firstname", event.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label={__("Last Name", TEXT_DOMAIN)}
+                value={contact.lastname}
+                onChange={(event) => onChangeContact("lastname", event.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label={__("Email", TEXT_DOMAIN)}
+                type="email"
+                value={contact.email}
+                onChange={(event) => onChangeContact("email", event.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label={__("Phone", TEXT_DOMAIN)}
+                value={contact.phone}
+                onChange={(event) => onChangeContact("phone", event.target.value)}
+                fullWidth
+                required
+              />
+            </Box>
 
-      <TextField
-        label={__("Message or special request", TEXT_DOMAIN)}
-        value={contact.notes}
-        onChange={(event) => onChangeContact("notes", event.target.value)}
-        multiline
-        minRows={3}
-        fullWidth
-        sx={{ mt: 2 }}
-      />
+            <TextField
+              label={__("Message or special request", TEXT_DOMAIN)}
+              value={contact.notes}
+              onChange={(event) => onChangeContact("notes", event.target.value)}
+              multiline
+              minRows={3}
+              fullWidth
+              sx={{ mt: 2 }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
 
-      <Box display="flex" justifyContent="space-between" mt={3}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
         <Button onClick={onBack}>{__("Back", TEXT_DOMAIN)}</Button>
         <Button variant="contained" onClick={onNext} disabled={!canNext}>
           {__("View Summary", TEXT_DOMAIN)}
         </Button>
       </Box>
-    </Box>
+    </>
   );
 }

@@ -9,6 +9,7 @@ class SubscriptionService {
       filters?: Record<string, string | Record<string, string>>;
       page?: number;
       size?: number;
+      fields?: string[];
     },
   ): Promise<{ items: Subscription[]; total: number }> {
     const { page = 1, size = 20 } = options || {};
@@ -28,6 +29,9 @@ class SubscriptionService {
         }
       });
       queryParams.append("filters", filters.join(";"));
+    }
+    if (options?.fields) {
+      queryParams.append("fields", options.fields.join(","));
     }
 
     const res = await fetch(

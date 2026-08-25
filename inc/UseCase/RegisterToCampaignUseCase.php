@@ -14,12 +14,15 @@ class RegisterToCampaignUseCase implements UseCaseInterface
 
     private EntityRepositoryInterface $requestRepository;
 
+    private EntityRepositoryInterface $requestLogRepository;
+
     private MailService $mailService;
 
     public function __construct(EntityManager $entityManager, MailService $mailService)
     {
         $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
+        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
         $this->mailService = $mailService;
     }
 
@@ -55,6 +58,12 @@ class RegisterToCampaignUseCase implements UseCaseInterface
             'data' => $params['data'] ?? [],
             'token' => bin2hex(random_bytes(16)), // Generate a random token
             'campaign_id' => $campaignId,
+        ]);
+
+        $this->requestLogRepository->insert([
+            'request_id' => $request->id,
+            'status' => 'pending',
+            'changed_at' => time(),
         ]);
 
         if ($this->sendConfirmationEmail($campaign, $request) === false) {
@@ -95,7 +104,7 @@ class RegisterToCampaignUseCase implements UseCaseInterface
             'memberName' => $request->firstname . ' ' . $request->lastname,
             'memberEmail' => $request->email,
             'requestId' => $request->id,
-            'adminUrl' => admin_url('admin.php?page=wolf-membership-requests'),
+            'adminUrl' => admin_url('admin.php?page=wolf-memberships#/campaign/' . $campaign->id . '/requests/' . $request->id),
         ];
         return $this->mailService->sendMail($email, 'wolf-membership:new-request', $context);
     }

@@ -27,7 +27,7 @@ export function AddressField({ address, onChange }: {
     };
 
     return (
-        <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }} gap={2}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
             <TextField
                 label={__("Line 1", TEXT_DOMAIN)}
                 value={address.line1 || ""}

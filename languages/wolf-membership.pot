@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Wolf Membership\n"
-"POT-Creation-Date: 2026-08-21 15:19+0200\n"
+"POT-Creation-Date: 2026-08-24 10:42+0200\n"
 "PO-Revision-Date: 2026-08-21 15:04+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -30,19 +30,19 @@ msgstr ""
 msgid "This request is not approved yet."
 msgstr ""
 
-#: build/admin/pay/render.php:59 build/admin/pay/render.php:164
-#: build/pay/render.php:59 build/pay/render.php:164 src/pay/render.php:59
-#: src/pay/render.php:164
+#: build/admin/pay/render.php:59 build/admin/pay/render.php:163
+#: build/pay/render.php:59 build/pay/render.php:163 src/pay/render.php:59
+#: src/pay/render.php:163
 msgid "Invalid payment method."
 msgstr ""
 
-#: build/admin/pay/render.php:172 build/pay/render.php:172
-#: src/pay/render.php:172
+#: build/admin/pay/render.php:171 build/pay/render.php:171
+#: src/pay/render.php:171
 msgid "Failed to generate payment URL."
 msgstr ""
 
-#: build/admin/pay/render.php:187 build/pay/render.php:187
-#: src/pay/render.php:187
+#: build/admin/pay/render.php:186 build/pay/render.php:186
+#: src/pay/render.php:186
 msgid "Please select a payment method to complete your registration:"
 msgstr ""
 
@@ -60,58 +60,70 @@ msgstr ""
 msgid "Membership"
 msgstr ""
 
+#: inc/Migration/Migration_0_0_2.php:23
+msgid "Membership Registration"
+msgstr ""
+
+#: inc/Migration/Migration_0_0_2.php:29
+msgid "Membership Pay"
+msgstr ""
+
+#: mails/request-rejected.subject.php:1
+msgid "Your request has been rejected"
+msgstr ""
+
 #: src/pay/edit.js:35 src/result/edit.js:35
 msgid "Event result – hello from the editor!"
 msgstr ""
 
-#: src/registration-form/app/App.tsx:88
+#: src/registration-form/app/App.tsx:58
 msgid "An error occurred."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:151
+#: src/registration-form/app/App.tsx:109
 msgid "The amount could not be calculated."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:164
+#: src/registration-form/app/App.tsx:119
 msgid "An error occurred while calculating the amount."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:300
+#: src/registration-form/app/App.tsx:189
 msgid "Please complete the information for each participant before proceeding."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:314 src/registration-form/app/App.tsx:498
+#: src/registration-form/app/App.tsx:203 src/registration-form/app/App.tsx:387
 msgid ""
 "Please complete the contact information and the information for each "
 "participant."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:397
+#: src/registration-form/app/App.tsx:286
 msgid "The registration could not be saved."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:412
+#: src/registration-form/app/App.tsx:301
 msgid "An error occurred during registration."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:435
+#: src/registration-form/app/App.tsx:324
 msgid "Registration Successful!"
 msgstr ""
 
-#: src/registration-form/app/App.tsx:439
+#: src/registration-form/app/App.tsx:328
 msgid "Thank you for your registration. We will contact you shortly."
 msgstr ""
 
-#: src/registration-form/app/App.tsx:449
+#: src/registration-form/app/App.tsx:338
 msgid "Participants"
 msgstr ""
 
-#: src/registration-form/app/App.tsx:450
-#: src/registration-form/app/steps/ReviewStep.tsx:45
+#: src/registration-form/app/App.tsx:339
+#: src/registration-form/app/steps/ReviewStep.tsx:41
 msgid "Contact"
 msgstr ""
 
-#: src/registration-form/app/App.tsx:451
+#: src/registration-form/app/App.tsx:340
 msgid "Review"
 msgstr ""
 
@@ -133,6 +145,50 @@ msgstr ""
 
 #: src/registration-form/app/form/field/Address.tsx:60
 msgid "Country"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:13
+msgid "Sunday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:14
+msgid "Monday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:15
+msgid "Tuesday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:16
+msgid "Wednesday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:17
+msgid "Thursday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:18
+msgid "Friday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:19
+msgid "Saturday"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:52
+msgid "Desired Course"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:64
+msgid "Choose a course"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:71
+msgid "No course available"
+msgstr ""
+
+#: src/registration-form/app/form/field/LessonSelect.tsx:95
+msgid "Available spots"
 msgstr ""
 
 #: src/registration-form/app/form/field/Upload.tsx:75
@@ -160,24 +216,24 @@ msgid "Contact Information"
 msgstr ""
 
 #: src/registration-form/app/steps/ContactStep.tsx:30
-#: src/registration-form/app/steps/ParticipantsStep.tsx:97
-#: src/registration-form/app/steps/ParticipantsStep.tsx:228
+#: src/registration-form/app/steps/ParticipantsStep.tsx:99
+#: src/registration-form/app/steps/ParticipantsStep.tsx:208
 msgid "First Name"
 msgstr ""
 
 #: src/registration-form/app/steps/ContactStep.tsx:37
-#: src/registration-form/app/steps/ParticipantsStep.tsx:110
-#: src/registration-form/app/steps/ParticipantsStep.tsx:240
+#: src/registration-form/app/steps/ParticipantsStep.tsx:112
+#: src/registration-form/app/steps/ParticipantsStep.tsx:220
 msgid "Last Name"
 msgstr ""
 
 #: src/registration-form/app/steps/ContactStep.tsx:44
-#: src/registration-form/app/steps/ParticipantsStep.tsx:252
+#: src/registration-form/app/steps/ParticipantsStep.tsx:232
 msgid "Email"
 msgstr ""
 
 #: src/registration-form/app/steps/ContactStep.tsx:52
-#: src/registration-form/app/steps/ParticipantsStep.tsx:265
+#: src/registration-form/app/steps/ParticipantsStep.tsx:245
 msgid "Phone"
 msgstr ""
 
@@ -186,7 +242,7 @@ msgid "Message or special request"
 msgstr ""
 
 #: src/registration-form/app/steps/ContactStep.tsx:71
-#: src/registration-form/app/steps/ReviewStep.tsx:128
+#: src/registration-form/app/steps/ReviewStep.tsx:124
 msgid "Back"
 msgstr ""
 
@@ -194,161 +250,181 @@ msgstr ""
 msgid "View Summary"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:45
+#: src/registration-form/app/steps/ParticipantsStep.tsx:47
 msgid "Register one or more participants"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:59
-#: src/registration-form/app/steps/ParticipantsStep.tsx:78
+#: src/registration-form/app/steps/ParticipantsStep.tsx:61
+#: src/registration-form/app/steps/ParticipantsStep.tsx:80
 msgid "Participant"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:83
+#: src/registration-form/app/steps/ParticipantsStep.tsx:85
 msgid "Remove participant"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:123
+#: src/registration-form/app/steps/ParticipantsStep.tsx:125
 msgid "Birthdate"
 msgstr ""
 
 #: src/registration-form/app/steps/ParticipantsStep.tsx:139
-msgid "License Type"
+msgid "Gender"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:152
-msgid "Hobby License"
+#: src/registration-form/app/steps/ParticipantsStep.tsx:146
+msgid "Male"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:155
-msgid "Competition License"
+#: src/registration-form/app/steps/ParticipantsStep.tsx:147
+msgid "Female"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:160
-msgid "Desired Course"
+#: src/registration-form/app/steps/ParticipantsStep.tsx:150
+msgid "Nationality"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:174
-msgid "Choose a course"
-msgstr ""
-
-#: src/registration-form/app/steps/ParticipantsStep.tsx:186
+#: src/registration-form/app/steps/ParticipantsStep.tsx:166
 msgid "Address"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:203
+#: src/registration-form/app/steps/ParticipantsStep.tsx:183
 msgid "Guardian Information"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:207
+#: src/registration-form/app/steps/ParticipantsStep.tsx:187
 msgid "Guardian 1"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:208
+#: src/registration-form/app/steps/ParticipantsStep.tsx:188
 msgid "Guardian 2"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:285
+#: src/registration-form/app/steps/ParticipantsStep.tsx:265
+msgid "License Information"
+msgstr ""
+
+#: src/registration-form/app/steps/ParticipantsStep.tsx:274
+msgid "License Type"
+msgstr ""
+
+#: src/registration-form/app/steps/ParticipantsStep.tsx:287
+msgid "Hobby License"
+msgstr ""
+
+#: src/registration-form/app/steps/ParticipantsStep.tsx:290
+msgid "Competition License"
+msgstr ""
+
+#: src/registration-form/app/steps/ParticipantsStep.tsx:310
 msgid "Health Questionnaire"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:304
+#: src/registration-form/app/steps/ParticipantsStep.tsx:329
 msgid "Required Documents for Competition License"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:315
+#: src/registration-form/app/steps/ParticipantsStep.tsx:340
 msgid "ID Photo"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:335
+#: src/registration-form/app/steps/ParticipantsStep.tsx:360
 msgid "Medical Certificate"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:352
+#: src/registration-form/app/steps/ParticipantsStep.tsx:377
 msgid "Additional Information"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:381
+#: src/registration-form/app/steps/ParticipantsStep.tsx:406
 msgid "Add a Person"
 msgstr ""
 
-#: src/registration-form/app/steps/ParticipantsStep.tsx:388
+#: src/registration-form/app/steps/ParticipantsStep.tsx:413
 msgid "Next"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:40
+#: src/registration-form/app/steps/ReviewStep.tsx:36
 msgid "Review Your Registration"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:64
+#: src/registration-form/app/steps/ReviewStep.tsx:60
 msgid "Person"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:71
+#: src/registration-form/app/steps/ReviewStep.tsx:67
 msgid "Course:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:71
+#: src/registration-form/app/steps/ReviewStep.tsx:67
 msgid "Not selected"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:74
+#: src/registration-form/app/steps/ReviewStep.tsx:70
 msgid "License:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:74
+#: src/registration-form/app/steps/ReviewStep.tsx:70
 msgid "Competition"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:74
+#: src/registration-form/app/steps/ReviewStep.tsx:70
 msgid "Hobby"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:77
+#: src/registration-form/app/steps/ReviewStep.tsx:73
 msgid "Address:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:84
-#: src/registration-form/app/steps/ReviewStep.tsx:89
-#: src/registration-form/app/steps/ReviewStep.tsx:92
+#: src/registration-form/app/steps/ReviewStep.tsx:80
+#: src/registration-form/app/steps/ReviewStep.tsx:85
+#: src/registration-form/app/steps/ReviewStep.tsx:88
 msgid "Not provided"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:89
+#: src/registration-form/app/steps/ReviewStep.tsx:85
 msgid "Guardian 1:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:92
+#: src/registration-form/app/steps/ReviewStep.tsx:88
 msgid "Guardian 2:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:98
+#: src/registration-form/app/steps/ReviewStep.tsx:94
 msgid "Health Questionnaire:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:98
-#: src/registration-form/app/steps/ReviewStep.tsx:104
-#: src/registration-form/app/steps/ReviewStep.tsx:107
+#: src/registration-form/app/steps/ReviewStep.tsx:94
+#: src/registration-form/app/steps/ReviewStep.tsx:100
+#: src/registration-form/app/steps/ReviewStep.tsx:103
 msgid "File not added"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:104
+#: src/registration-form/app/steps/ReviewStep.tsx:100
 msgid "Identity Photo:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:107
+#: src/registration-form/app/steps/ReviewStep.tsx:103
 msgid "Medical Certificate:"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:119
+#: src/registration-form/app/steps/ReviewStep.tsx:115
 msgid "Total to Pay"
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:131
+#: src/registration-form/app/steps/ReviewStep.tsx:127
 msgid "Saving..."
 msgstr ""
 
-#: src/registration-form/app/steps/ReviewStep.tsx:131
+#: src/registration-form/app/steps/ReviewStep.tsx:127
 msgid "Confirm"
+msgstr ""
+
+#: src/registration-form/app/ui/FilePreview.tsx:36
+msgid "No file selected"
+msgstr ""
+
+#: src/registration-form/app/ui/FilePreview.tsx:61
+msgid "Preview"
 msgstr ""
 
 #: src/registration-form/edit.js:9

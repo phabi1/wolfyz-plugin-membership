@@ -9,7 +9,14 @@ export function UploadField({ file, onChange }: {
     file: string | null,
     onChange: (file: string | null) => void
 }) {
-    
+
+    const filename = useMemo(() => {
+        if (!file) {
+            return null;
+        }
+        return file.split('/').pop() || file;
+    }, [file]);
+
     const previewUrl = useMemo(() => {
         if (!file) {
             return '#';
@@ -70,7 +77,7 @@ export function UploadField({ file, onChange }: {
 
     if (uploading) {
         return (
-            <Box display="flex" flexDirection="column" gap={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography variant="body2">
                     {__("Uploading...", TEXT_DOMAIN)}
                 </Typography>
@@ -80,7 +87,7 @@ export function UploadField({ file, onChange }: {
 
     if (removing) {
         return (
-            <Box display="flex" flexDirection="column" gap={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography variant="body2">
                     {__("Removing...", TEXT_DOMAIN)}
                 </Typography>
@@ -90,7 +97,7 @@ export function UploadField({ file, onChange }: {
 
     if (error) {
         return (
-            <Box display="flex" flexDirection="column" gap={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography variant="body2" color="error">
                     {error}
                 </Typography>
@@ -99,11 +106,11 @@ export function UploadField({ file, onChange }: {
     }
 
     return (
-        <Box display="flex" flexDirection="column" gap={2}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {file ? (
                 <Box>
                     <Typography variant="body2">
-                        {__("Selected file:", TEXT_DOMAIN)} <a href={previewUrl} target="_blank" rel="noopener noreferrer">{file}</a>
+                        {__("Selected file:", TEXT_DOMAIN)} <a href={previewUrl} target="_blank" rel="noopener noreferrer">{filename}</a>
                     </Typography>
                     <Button variant="outlined" color="secondary" onClick={handleRemoveFile}>
                         {__("Remove", TEXT_DOMAIN)}

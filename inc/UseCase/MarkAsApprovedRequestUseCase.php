@@ -2,6 +2,7 @@
 
 namespace Wolf\Memberships\UseCase;
 
+use Wolf\Core\Entity\EntityRepositoryInterface;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
 use Wolf\Core\Mail\MailService;
@@ -11,12 +12,16 @@ class MarkAsApprovedRequestUseCase implements UseCaseInterface
     private $campaignRepository;
 
     private $requestRepository;
+
+    private EntityRepositoryInterface $requestLogRepository;
+
     private $mailService;
 
     public function __construct(EntityManager $entityManager, MailService $mailService)
     {
         $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
+        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
         $this->mailService = $mailService;
     }
 
@@ -49,6 +54,13 @@ class MarkAsApprovedRequestUseCase implements UseCaseInterface
             'status' => 'approved',
         ]);
 
+        $this->requestLogRepository->insert([
+            'request_id' => $requestId,
+            'status' => 'approved',
+            'changed_at' => time(),
+            'changed_by' => $params['user_id'] ?? null,
+        ]);
+
         // Generate a payment URL (this is just a placeholder, implement your own logic)
         $paymentUrl = $this->buildPaymentUrl($campaignId, $updatedRequest);
 
@@ -69,6 +81,8 @@ class MarkAsApprovedRequestUseCase implements UseCaseInterface
             // Log the error or handle it as needed
             error_log('Failed to send approval email: ' . $e->getMessage());
         }
+
+        do_action('wolf_memberships_request_approved', ['request' => $updatedRequest]);
 
         return [];
     }

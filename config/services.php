@@ -258,6 +258,19 @@ return [
             ]
         ]
     ],
+    'wolf-memberships.use_case.mark_as_paid_request' => [
+        'class' => \Wolf\Memberships\UseCase\MarkAsPaidRequestUseCase::class,
+        'arguments' => [
+            '@wolf.entity.manager',
+            '@wolf.mail'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.mark_as_paid_request'
+            ]
+        ]
+    ],
     'wolf-memberships.use_case.mark_as_cancelled_request' => [
         'class' => \Wolf\Memberships\UseCase\MarkAsCancelledRequestUseCase::class,
         'arguments' => [
@@ -268,6 +281,32 @@ return [
             [
                 'name' => 'use_case',
                 'value' => 'wolf-memberships.cancel_request'
+            ]
+        ]
+    ],
+    'wolf-memberships.use_case.get_history_of_request' => [
+        'class' => \Wolf\Memberships\UseCase\GetHistoryOfRequestUseCase::class,
+        'arguments' => [
+            '@wolf.entity.manager'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.get_history_of_request'
+            ]
+        ]
+    ],
+    'wolf-memberships.use_case.convert_request_to_subscriptions' => [
+        'class' => \Wolf\Memberships\UseCase\ConvertRequestToSubscriptionsUseCase::class,
+        'arguments' => [
+            '@wolf.entity.manager',
+            '@wolf-memberships.helper.member',
+            '@wolf.helper.date'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.convert_request_to_subscriptions'
             ]
         ]
     ]

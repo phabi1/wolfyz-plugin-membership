@@ -1,20 +1,34 @@
-import { useReducer, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
-import RequestService from "../../services/requests";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { __ } from "@wordpress/i18n";
+import { useEffect, useMemo, useReducer } from "react";
+import { useParams } from "react-router";
+import { RequestHistory } from "../../components/requests/History";
+import { ParticipantsCard } from "../../components/requests/ParticipantsCard";
+import { PayerCard } from "../../components/requests/PayerCard";
 import Page, { Action as PageAction } from "../../components/ui/Page";
 import { Request } from "../../models/request";
-import { PayerCard } from "../../components/requests/PayerCard";
-import { ParticipantsCard } from "../../components/requests/ParticipantsCard";
+import { RequestHistoryItem } from "../../models/request-history";
+import RequestService from "../../services/requests";
+import Select from "@mui/material/Select";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import MenuItem from "@mui/material/MenuItem";
+import { RequestStatusSwitcher } from "../../components/requests/StatusSwitcher";
 
 interface State {
     item: Request | null;
+    history: RequestHistoryItem[]; // Replace 'any' with the appropriate type for history items
     loading: boolean;
 }
 
 type Action =
     | {
         type: "fetchItem";
-        payload: Request;
+        payload: {
+            item: Request | null;
+            history: RequestHistoryItem[];
+        };
     }
     | {
         type: "setLoading";
@@ -24,7 +38,6 @@ type Action =
 
 export default function RequestDetailsPage() {
     const { campaignId, requestId } = useParams();
-    const navigate = useNavigate();
 
     const [state, dispatch] = useReducer(
         (state: State, action: Action) => {
@@ -34,7 +47,8 @@ export default function RequestDetailsPage() {
                 case "fetchItem":
                     return {
                         ...state,
-                        item: action.payload,
+                        item: action.payload.item,
+                        history: action.payload.history,
                     };
                 default:
                     return state;
@@ -42,87 +56,56 @@ export default function RequestDetailsPage() {
         },
         {
             item: null,
+            history: [],
             loading: false,
         },
     );
+
+    const fetchRequestDetails = async (campaignId: string, requestId: string) => {
+        dispatch({ type: "setLoading", payload: true });
+        try {
+            const item = await RequestService.item(campaignId, requestId);
+            const history = await RequestService.history(campaignId, requestId);
+            dispatch({ type: "fetchItem", payload: { item, history } });
+        } catch (error) {
+            console.error("Error fetching request details:", error);
+            dispatch({ type: "fetchItem", payload: { item: null, history: [] } });
+        } finally {
+            dispatch({ type: "setLoading", payload: false });
+        }
+    };
 
     useEffect(() => {
         if (!campaignId || !requestId) {
             return;
         }
 
-        dispatch({ type: "setLoading", payload: true });
-        RequestService.item(campaignId, requestId)
-            .then((item) => {
-                dispatch({ type: "fetchItem", payload: item });
-            })
-            .finally(() => {
-                dispatch({ type: "setLoading", payload: false });
-            });
+        fetchRequestDetails(campaignId, requestId);
     }, [campaignId, requestId]);
 
-    const pageActions = useMemo<PageAction[]>(() => {
-        if (state.loading || !state.item) {
-            return [];
+    const handleStatusChanged = async ({ status, reason }: { status: string; reason?: string }) => {
+        if (!campaignId || !requestId) {
+            return;
         }
-        if (state.item.status === "pending") {
-            return [
-                {
-                    name: "approve",
-                    label: "Approve",
-                    primary: true,
-                    handler: async () => {
-                        if (!campaignId || !requestId) {
-                            return;
-                        }
-                        try {
-                            await RequestService.approve(campaignId, requestId);
-                            dispatch({ type: "fetchItem", payload: { ...state.item!, status: "approved" } });
-                        } catch (error) {
-                            console.error("Error approving request:", error);
-                        }
-                    },
-                },
-                {
-                    name: "reject",
-                    label: "Reject",
-                    handler: async () => {
-                        if (!campaignId || !requestId) {
-                            return;
-                        }
-                        try {
-                            await RequestService.reject(campaignId, requestId);
-                            dispatch({ type: "fetchItem", payload: { ...state.item!, status: "rejected" } });
-                        } catch (error) {
-                            console.error("Error rejecting request:", error);
-                        }
-                    },
-                },
-            ];
-        } else if (state.item.status === "approved") {
-            return [
-                {
-                    name: "paid",
-                    label: "Mark as Paid",
-                    handler: async () => {
-                        if (!campaignId || !requestId) {
-                            return;
-                        }
-                        try {
-                            await RequestService.paid(campaignId, requestId);
-                            dispatch({ type: "fetchItem", payload: { ...state.item!, status: "paid" } });
-                        } catch (error) {
-                            console.error("Error marking request as paid:", error);
-                        }
-                    },
-                },
-            ];
-        } else {
-            return [
-
-            ];
+        switch (status) {
+            case "approved":
+                await RequestService.approve(campaignId, requestId);
+                break;
+            case "rejected":
+                await RequestService.reject(campaignId, requestId, reason || "");
+                break;
+            case "paid":
+                await RequestService.paid(campaignId, requestId);
+                break;
+            case "cancelled":
+                await RequestService.cancel(campaignId, requestId);
+                break;
+            default:
+                break;
         }
-    }, [state.item]);
+        // Refresh the request details after status change
+        fetchRequestDetails(campaignId, requestId);
+    };
 
     if (state.loading) {
         return <div>Loading...</div>;
@@ -133,9 +116,22 @@ export default function RequestDetailsPage() {
     }
 
     return (
-        <Page title={`Request Details - ${state.item.id}`} actions={pageActions}>
-            <PayerCard request={state.item} />
-            <ParticipantsCard participants={state.item.data.participants} />
-        </Page>
+        <Page title={`Request Details - ${state.item.id}`}>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                    <PayerCard request={state.item} />
+                    <ParticipantsCard participants={state.item.data.participants} />
+                </Box>
+                <Box sx={{ width: 320 }}>
+                    <Paper sx={{ padding: 2, marginBottom: 2 }}>
+                        <RequestStatusSwitcher value={state.item.status} onChange={handleStatusChanged} />
+                    </Paper>
+                    <Typography variant="h6">{__('Request History', 'wolf-membership')}</Typography>
+                    <Paper sx={{ padding: 2, marginTop: 1 }}>
+                        <RequestHistory history={state.history} />
+                    </Paper>
+                </Box>
+            </Box>
+        </Page >
     );
 }

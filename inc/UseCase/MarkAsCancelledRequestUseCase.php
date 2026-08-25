@@ -2,6 +2,7 @@
 
 namespace Wolf\Memberships\UseCase;
 
+use Wolf\Core\Entity\EntityRepositoryInterface;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
 use Wolf\Core\Mail\MailService;
@@ -9,11 +10,15 @@ use Wolf\Core\Mail\MailService;
 class MarkAsCancelledRequestUseCase implements UseCaseInterface
 {
     private $requestRepository;
+
+    private EntityRepositoryInterface $requestLogRepository;
+
     private $mailService;
 
     public function __construct(EntityManager $entityManager, MailService $mailService)
     {
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
+        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
         $this->mailService = $mailService;
     }
 
@@ -44,6 +49,13 @@ class MarkAsCancelledRequestUseCase implements UseCaseInterface
             'status' => 'cancelled',
         ]);
 
+        $this->requestLogRepository->insert([
+            'request_id' => $requestId,
+            'status' => 'cancelled',
+            'changed_at' => time(),
+            'changed_by' => $params['user_id'] ?? null,
+        ]);
+
         // Send an email notification to the user
         try {
             $this->mailService->sendMail(
@@ -60,6 +72,8 @@ class MarkAsCancelledRequestUseCase implements UseCaseInterface
             // Log the error or handle it as needed
             error_log('Failed to send cancellation email: ' . $e->getMessage());
         }
+
+        do_action('wolf_memberships_request_cancelled', ['request' => $updatedRequest]);
 
         return [];
     }

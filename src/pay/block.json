@@ -4,7 +4,7 @@
 	"name": "wolf-membership/pay",
 	"version": "0.1.0",
 	"title": "Pay",
-	"category": "widgets",
+	"category": "memberships",
 	"icon": "smiley",
 	"description": "Display payment options for membership campaigns.",
 	"example": {},

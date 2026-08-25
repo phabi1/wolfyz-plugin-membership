@@ -115,7 +115,8 @@ export default function MemberListPage() {
 
   const columns: DataGridColumn<Subscription>[] = [
     { name: "id", header: "ID", width: 70, type: "number" },
-    { name: "avatar", header: "Avatar", width: 100, type: "custom", data: "member.avatar_url", renderCell: (value: any, row: Subscription) => {
+    {
+      name: "avatar", header: "Avatar", width: 100, type: "custom", data: "member.avatar_url", renderCell: (value: any, row: Subscription) => {
         return <MemberAvatar url={row.member.avatar_url} gender={row.member.gender} />;
       },
     },
@@ -154,7 +155,7 @@ export default function MemberListPage() {
       name: "license_type",
       header: "License Type",
       type: "text",
-      data: "member.license_type",
+      data: "license_type",
     },
   ];
 
@@ -172,6 +173,11 @@ export default function MemberListPage() {
       page: state.pagination.page + 1,
       size: state.pagination.size,
       filters: { ...state.filters },
+      fields: [
+        "id",
+        "license_type",
+        "member",
+      ]
     }).then((data: { items: Subscription[]; total: number }) => {
       dispatch({ type: "fetchItems", payload: data });
       dispatch({ type: "setLoading", payload: false });

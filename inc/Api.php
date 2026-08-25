@@ -131,6 +131,12 @@ class Api implements ContainerAwareInterface
             'callback' => [$controller, 'cancel'],
             'permission_callback' => '__return_true'
         ]);
+
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/history', [
+            'methods' => 'GET',
+            'callback' => [$controller, 'history'],
+            'permission_callback' => '__return_true'
+        ]);
     }
 
     protected function registerRegistrationRoutes()

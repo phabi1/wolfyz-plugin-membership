@@ -2,18 +2,25 @@
 
 namespace Wolf\Memberships\UseCase;
 
+use Wolf\Core\Entity\EntityRepositoryInterface;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
 use Wolf\Core\Mail\MailService;
 
 class MarkAsRejectedRequestUseCase implements UseCaseInterface
 {
+    private $campaignRepository;
     private $requestRepository;
+
+    private EntityRepositoryInterface $requestLogRepository;
+
     private $mailService;
 
     public function __construct(EntityManager $entityManager, MailService $mailService)
     {
+        $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
+        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
         $this->mailService = $mailService;
     }
 
@@ -35,14 +42,28 @@ class MarkAsRejectedRequestUseCase implements UseCaseInterface
             throw new \Exception('Request not found.');
         }
 
-        if (!$request->status == 'pending' && !$request->status == 'approved') {
-            throw new \Exception('Only pending or approved requests can be rejected.');
+        if ($request->status !== 'pending') {
+            throw new \Exception('Only pending requests can be rejected.');
         }
 
-        // Update the request status to 'approved'
+        $campaign = $this->campaignRepository->findById($campaignId);
+
+        // Update the request status to 'rejected'
         $updatedRequest = $this->requestRepository->update($requestId, [
             'status' => 'rejected',
         ]);
+
+        $this->requestLogRepository->insert([
+            'request_id' => $requestId,
+            'status' => 'rejected',
+            'params' => [
+                'reason' => $params['reason'] ?? '',
+            ],
+            'changed_at' => time(),
+            'changed_by' => $params['user_id'] ?? null,
+        ]);
+
+        $editUrl = $this->buildEditUrl($campaign, $request);
 
         // Send an email notification to the user
         try {
@@ -52,8 +73,9 @@ class MarkAsRejectedRequestUseCase implements UseCaseInterface
                 [
                     'firstname' => $updatedRequest->firstname,
                     'lastname' => $updatedRequest->lastname,
-                    'campaign_id' => $campaignId,
-                    'request_id' => $requestId,
+                    'campaignName' => $campaign->title,
+                    'reason' => $params['reason'] ?? '',
+                    'editUrl' => $editUrl,
                 ]
             );
         } catch (\Exception $e) {
@@ -61,6 +83,15 @@ class MarkAsRejectedRequestUseCase implements UseCaseInterface
             error_log('Failed to send rejection email: ' . $e->getMessage());
         }
 
+        do_action('wolf_memberships_request_rejected', ['request' => $updatedRequest]);
+
         return [];
+    }
+
+    private function buildEditUrl($campaign, $request): string
+    {
+        $pageId = get_option('wolf_membership_registration_page');
+
+        return get_permalink($pageId) . "?campaign_id={$campaign->id}&request_id={$request->id}&token={$request->token}";
     }
 }

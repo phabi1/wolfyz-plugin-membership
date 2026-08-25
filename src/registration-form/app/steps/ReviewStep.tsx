@@ -1,13 +1,19 @@
-import { __ } from "@wordpress/i18n";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { formatPrice } from '../pipes';
+import { __ } from "@wordpress/i18n";
 import { isParticipantMinor } from '../helpers';
-
-const TEXT_DOMAIN = "wolf-membership";
+import type { Contact } from "../models/contact";
+import type { Lesson as LessonModel } from '../models/lesson';
+import type { Participant } from '../models/participant';
+import { formatPrice } from '../pipes';
+import { Address } from "../ui/Address";
+import { FilePreview } from "../ui/FilePreview";
+import { Lesson } from "../ui/Lesson";
+import { PropValue } from "../ui/PropValue";
+import { TEXT_DOMAIN } from "../utils";
 
 export function ReviewStep({
   contact,
@@ -18,15 +24,9 @@ export function ReviewStep({
   onSubmit,
   submitting,
 }: {
-  contact: {
-    firstname: string;
-    lastname: string;
-    email: string;
-    phone: string;
-    notes?: string;
-  };
-  participants: any[];
-  lessons: any[];
+  contact: Contact;
+  participants: Participant[];
+  lessons: LessonModel[];
   totalToPay: number;
   submitting: boolean;
   onBack: () => void;
@@ -55,7 +55,7 @@ export function ReviewStep({
 
 
       {participants.map((participant, index) => {
-        const lesson = lessons.find((item) => String(item.id) === participant.lessonId);
+        const lesson = lessons.find((item) => String(item.id) === participant.lesson_id);
 
         return (
           <Card key={index} variant="outlined" sx={{ mb: 2 }}>
@@ -63,52 +63,84 @@ export function ReviewStep({
               <Typography variant="h6" gutterBottom>
                 {__("Person", TEXT_DOMAIN)} {index + 1}
               </Typography>
-              <Typography>
+              <PropValue label={__("Name", TEXT_DOMAIN)}>
                 {participant.firstname} {participant.lastname}
-              </Typography>
-              <Typography>{participant.birthdate}</Typography>
-              <Typography>
-                {__("Course:", TEXT_DOMAIN)} {lesson ? lesson.title || lesson.name : __("Not selected", TEXT_DOMAIN)}
-              </Typography>
-              <Typography>
-                {__("License:", TEXT_DOMAIN)} {participant.licenseType === "competition" ? __("Competition", TEXT_DOMAIN) : __("Hobby", TEXT_DOMAIN)}
-              </Typography>
-              <Typography>
-                {__("Address:", TEXT_DOMAIN)} {[
-                  participant.street,
-                  participant.line1,
-                  participant.line2,
-                  participant.zipcode,
-                  participant.city,
-                  participant.country,
-                ].filter(Boolean).join(", ") || __("Not provided", TEXT_DOMAIN)}
-              </Typography>
+              </PropValue>
+              <PropValue label={__("Birthdate", TEXT_DOMAIN)}>
+                {participant.birthdate}
+              </PropValue>
+              <PropValue label={__("Gender", TEXT_DOMAIN)}>
+                {participant.gender}
+              </PropValue>
+              <PropValue label={__("Nationality", TEXT_DOMAIN)}>
+                {participant.nationality}
+              </PropValue>
+              <PropValue label={__("Email", TEXT_DOMAIN)}>
+                {participant.email}
+              </PropValue>
+              <PropValue label={__("Phone", TEXT_DOMAIN)}>
+                {participant.phone}
+              </PropValue>
+              <PropValue label={__("Address", TEXT_DOMAIN)}>
+                {participant.address ? (
+                  <Address value={participant.address} />
+                ) : (
+                  __("Not provided", TEXT_DOMAIN)
+                )}
+              </PropValue>
+              <PropValue label={__("License Type", TEXT_DOMAIN)}>
+                {participant.license_type === "hobby"
+                  ? __("Hobby", TEXT_DOMAIN)
+                  : __("Competition", TEXT_DOMAIN)}
+              </PropValue>
+              <PropValue label={__("Lesson", TEXT_DOMAIN)}>
+                {lesson ? (
+                  <Lesson lesson={lesson} />
+                ) : __("Not selected", TEXT_DOMAIN)}
+              </PropValue>
+
               {isParticipantMinor(participant.birthdate) && (
                 <>
-                  <Typography>
-                    {__("Guardian 1:", TEXT_DOMAIN)} {participant.tutor1?.firstname || __("Not provided", TEXT_DOMAIN)} {participant.tutor1?.lastname || ""} · {participant.tutor1?.email || ""} · {participant.tutor1?.phone || ""}
-                  </Typography>
-                  <Typography>
-                    {__("Guardian 2:", TEXT_DOMAIN)} {participant.tutor2?.firstname || __("Not provided", TEXT_DOMAIN)} {participant.tutor2?.lastname || ""} · {participant.tutor2?.email || ""} · {participant.tutor2?.phone || ""}
-                  </Typography>
+                  <PropValue label={__("Guardian 1", TEXT_DOMAIN)}>
+                    {participant.tutor1?.firstname || __("Not provided", TEXT_DOMAIN)} {participant.tutor1?.lastname || ""}
+                  </PropValue>
+                  <PropValue label={__("Guardian 2", TEXT_DOMAIN)}>
+                    {participant.tutor2?.firstname || __("Not provided", TEXT_DOMAIN)} {participant.tutor2?.lastname || ""}
+                  </PropValue>
                 </>
               )}
-              {participant.licenseType === "hobby" && (
-                <Typography>
-                  {__("Health Questionnaire:", TEXT_DOMAIN)} {participant.healthQuestionnaire?.name || __("File not added", TEXT_DOMAIN)}
-                </Typography>
+              {participant.license_type === "hobby" && (
+                <PropValue label={__("Health Questionnaire", TEXT_DOMAIN)}>
+                  {participant.health_questionnaire ? (
+                    <FilePreview file={participant.health_questionnaire} />
+                  ) : (
+                    __("File not added", TEXT_DOMAIN)
+                  )}
+                </PropValue>
               )}
-              {participant.licenseType === "competition" && (
+              {participant.license_type === "competition" && (
                 <>
-                  <Typography>
-                    {__("Identity Photo:", TEXT_DOMAIN)} {participant.identityPhoto?.name || __("File not added", TEXT_DOMAIN)}
-                  </Typography>
-                  <Typography>
-                    {__("Medical Certificate:", TEXT_DOMAIN)} {participant.medicalCertificate?.name || __("File not added", TEXT_DOMAIN)}
-                  </Typography>
+                  <PropValue label={__("Identity Photo", TEXT_DOMAIN)}>
+                    {participant.identity_photo ? (
+                      <FilePreview file={participant.identity_photo} />
+                    ) : (
+                      __("File not added", TEXT_DOMAIN)
+                    )}
+                  </PropValue>
+                  <PropValue label={__("Medical Certificate", TEXT_DOMAIN)}>
+                    {participant.medical_certificate ? (
+                      <FilePreview file={participant.medical_certificate} />
+                    ) : (
+                      __("File not added", TEXT_DOMAIN)
+                    )}
+                  </PropValue>
                 </>
               )}
-              {participant.comment && <Typography sx={{ mt: 1 }}>{participant.comment}</Typography>}
+              {participant.comment && (
+                <PropValue label={__("Comment", TEXT_DOMAIN)}>
+                  {participant.comment}
+                </PropValue>
+              )}
             </CardContent>
           </Card>
         );
@@ -123,7 +155,7 @@ export function ReviewStep({
         </CardContent>
       </Card>
 
-      <Box display="flex" justifyContent="space-between" mt={3}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
         <Button onClick={onBack} disabled={submitting}>
           {__("Back", TEXT_DOMAIN)}
         </Button>
@@ -131,6 +163,6 @@ export function ReviewStep({
           {submitting ? __("Saving...", TEXT_DOMAIN) : __("Confirm", TEXT_DOMAIN)}
         </Button>
       </Box>
-    </Box>
+    </Box >
   );
 }

@@ -3,7 +3,6 @@
 namespace Wolf\Memberships\UseCase;
 
 use Wolf\Core\Entity\EntityRepositoryInterface;
-use Wolf\Core\UseCase\UseCaseBus;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
 use Wolf\Core\Mail\MailService;
@@ -14,12 +13,15 @@ class UpdateRequestUseCase implements UseCaseInterface
 
     private EntityRepositoryInterface $requestRepository;
 
+    private EntityRepositoryInterface $requestLogRepository;
+
     private MailService $mailService;
 
     public function __construct(EntityManager $entityManager, MailService $mailService)
     {
         $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
+        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
         $this->mailService = $mailService;
     }
 
@@ -59,12 +61,20 @@ class UpdateRequestUseCase implements UseCaseInterface
         }
 
         $request = $this->requestRepository->update($params['request_id'], [
+            'status' => 'pending',
             'firstname' => $params['contact']['firstname'] ?? null,
             'lastname' => $params['contact']['lastname'] ?? null,
             'email' => $params['contact']['email'] ?? null,
             'phone' => $params['contact']['phone'] ?? null,
             'data' => $params['data'] ?? [],
             'campaign_id' => $campaignId,
+        ]);
+
+        $this->requestLogRepository->insert([
+            'request_id' => $request->id,
+            'status' => 'pending',
+            'changed_at' => time(),
+            'changed_by' => null,
         ]);
 
         if ($this->sendConfirmationEmail($campaign, $request) === false) {

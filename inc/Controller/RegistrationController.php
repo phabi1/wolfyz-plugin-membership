@@ -67,10 +67,10 @@ class RegistrationController extends AbstractController
                 'request_id' => $requestId,
                 'token' => $token,
                 'contact' => [
-                    'firstname' => $payload['contact']['firstname'] ?? null,
-                    'lastname' => $payload['contact']['lastname'] ?? null,
-                    'email' => $payload['contact']['email'] ?? null,
-                    'phone' => $payload['contact']['phone'] ?? null,
+                    'firstname' => $payload['data']['contact']['firstname'] ?? null,
+                    'lastname' => $payload['data']['contact']['lastname'] ?? null,
+                    'email' => $payload['data']['contact']['email'] ?? null,
+                    'phone' => $payload['data']['contact']['phone'] ?? null,
                 ],
                 'data' => $payload['data'] ?? [],
             ]);
@@ -78,10 +78,10 @@ class RegistrationController extends AbstractController
             $useCaseBus->execute('wolf-memberships.register_to_campaign', [
                 'campaign_id' => $campaignId,
                 'contact' => [
-                    'firstname' => $payload['contact']['firstname'] ?? null,
-                    'lastname' => $payload['contact']['lastname'] ?? null,
-                    'email' => $payload['contact']['email'] ?? null,
-                    'phone' => $payload['contact']['phone'] ?? null,
+                    'firstname' => $payload['data']['contact']['firstname'] ?? null,
+                    'lastname' => $payload['data']['contact']['lastname'] ?? null,
+                    'email' => $payload['data']['contact']['email'] ?? null,
+                    'phone' => $payload['data']['contact']['phone'] ?? null,
                 ],
                 'data' => $payload['data'] ?? [],
             ]);

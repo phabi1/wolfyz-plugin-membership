@@ -5,6 +5,7 @@ namespace Wolf\Memberships\UseCase;
 use Wolf\Core\Entity\EntityRepositoryInterface;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
+use Wolf\Memberships\Entity\Repository\SessionEntityRepositoryInterface;
 
 class GetRegistrationUseCase implements UseCaseInterface
 {
@@ -12,12 +13,19 @@ class GetRegistrationUseCase implements UseCaseInterface
 
     private EntityRepositoryInterface $lessonRepository;
 
+    private SessionEntityRepositoryInterface $sessionRepository;
+
     private EntityRepositoryInterface $requestRepository;
 
     public function __construct(EntityManager $entityManager)
     {
         $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
         $this->lessonRepository = $entityManager->getRepository('wolf-memberships.lesson');
+        $sessionRepository = $entityManager->getRepository('wolf-memberships.session');
+        if (!$sessionRepository instanceof SessionEntityRepositoryInterface) {
+            throw new \RuntimeException('Session repository must implement SessionEntityRepositoryInterface');
+        }
+        $this->sessionRepository = $sessionRepository;
         $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
     }
 
@@ -36,7 +44,7 @@ class GetRegistrationUseCase implements UseCaseInterface
 
         $lessons = $this->lessonRepository->find(['campaign_id' => ['eq' => $campaignId]]);
 
-
+        $this->calculateCompletude($lessons);
 
         $response = [
             'registration_start' => $campaign->registration_start,
@@ -64,5 +72,15 @@ class GetRegistrationUseCase implements UseCaseInterface
 
         return $response;
 
+    }
+
+    private function calculateCompletude(array &$lessons): void
+    {
+        $lessonIds = array_map(fn($lesson) => $lesson->id, $lessons);
+        $sessionCounts = $this->sessionRepository->countByLessons($lessonIds);
+
+        foreach ($lessons as &$lesson) {
+            $lesson->participant_nb = $sessionCounts[$lesson->id] ?? 0;
+        }
     }
 }
