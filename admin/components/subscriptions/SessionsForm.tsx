@@ -1,18 +1,15 @@
 import { useState } from 'react';
 import UiCollection from '../ui/Collection';
-import Box from '@mui/material/Box';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
+import { Modal } from '@wordpress/components';
 import Form from '../forms/Form';
 import SelectField from '../forms/fields/SelectField';
 import { useForm } from 'react-hook-form';
 
 function SessionItem({ session }: { session: any }) {
     return (
-        <Box>
+        <div>
             <div>{session.lesson.title}</div>
-        </Box>
+        </div>
     );
 }
 
@@ -48,14 +45,13 @@ export default function SessionsForm({ subscription, sessions, onAddSession, onR
             <UiCollection items={sessions || []} renderItem={(session) => (
                 <SessionItem session={session} />
             )} onAddItem={handleAddSession} onRemoveItem={handleRemoveSession} />
-            <Dialog open={open} fullWidth maxWidth="sm">
-                <DialogTitle>Session</DialogTitle>
-                <DialogContent>
+            {open ? (
+                <Modal title="Session" onRequestClose={() => setOpen(false)}>
                     <Form form={form} onSubmit={handleSaveSession}>
                         <SelectField name="session" label="Session" required options={[]} />
                     </Form>
-                </DialogContent>
-            </Dialog>
+                </Modal>
+            ) : null}
         </>
     );
 }

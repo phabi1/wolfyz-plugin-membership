@@ -1,9 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+import { CheckboxControl } from '@wordpress/components';
 
 export default function CheckboxesField( { name, label, options }: any ) {
 	const { control } = useFormContext();
@@ -12,43 +8,31 @@ export default function CheckboxesField( { name, label, options }: any ) {
 			name={ name }
 			control={ control }
 			render={ ( { field, fieldState } ) => (
-				<FormControl
-					fullWidth
-					error={ !! fieldState.error }
-					sx={ { mb: 2 } }
-				>
-					<FormLabel>{ label }</FormLabel>
-					<FormGroup>
-						{ options.map( ( option: any ) => (
-							<FormControlLabel
-								key={ option.value }
-								control={
-									<Checkbox
-										checked={
-											field.value?.includes(
-												option.value
-											) || false
-										}
-										onChange={ ( e ) => {
-											const newValue = e.target.checked
-												? [
-														...( field.value ||
-															[] ),
-														option.value,
-												  ]
-												: field.value?.filter(
-														( v: any ) =>
-															v !== option.value
-												  );
-											field.onChange( newValue );
-										} }
-									/>
-								}
-								label={ option.label }
-							/>
-						) ) }
-					</FormGroup>
-				</FormControl>
+				<div style={ { marginBottom: 16 } }>
+					<p style={ { margin: '0 0 8px', fontWeight: 600 } }>{ label }</p>
+					{ options.map( ( option: any ) => (
+						<CheckboxControl
+							key={ option.value }
+							label={ option.label }
+							checked={
+								field.value?.includes( option.value ) || false
+							}
+							onChange={ ( checked ) => {
+								const newValue = checked
+									? [ ...( field.value || [] ), option.value ]
+									: field.value?.filter(
+											( v: any ) => v !== option.value
+									  );
+								field.onChange( newValue );
+							} }
+						/>
+					) ) }
+					{ fieldState.error ? (
+						<p style={ { margin: '6px 0 0', color: '#b32d2e' } }>
+							{ fieldState.error.message }
+						</p>
+					) : null }
+				</div>
 			) }
 		/>
 	);

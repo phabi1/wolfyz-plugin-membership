@@ -3,10 +3,10 @@
 	"apiVersion": 3,
 	"name": "wolf-membership/result",
 	"version": "0.1.0",
-	"title": "Event result",
+	"title": "Campaign result",
 	"category": "widgets",
 	"icon": "smiley",
-	"description": "Display result for registered campaign.",
+	"description": "Display result for a registered campaign.",
 	"example": {},
 	"supports": {
 		"html": false

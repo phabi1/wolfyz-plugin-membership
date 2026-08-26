@@ -1,6 +1,5 @@
 import { Member } from "../../models/member";
 import { useMemo } from "react";
-import Avatar from "@mui/material/Avatar";
 
 import { forwardRef } from "react";
 
@@ -18,7 +17,18 @@ const MemberAvatar = forwardRef<HTMLDivElement, { url?: string; gender?: "male" 
     }, [url, gender]);
 
     return (
-        <Avatar src={avatarUrl} />
+        <img
+            ref={ref}
+            src={avatarUrl}
+            alt="Member avatar"
+            style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                objectFit: "cover",
+                display: "block",
+            }}
+        />
     );
 });
 

@@ -1,35 +1,29 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import Card from "@mui/material/Card";
-import Typography from "@mui/material/Typography";
+import { Card, CardBody } from "@wordpress/components";
+import { __, sprintf } from "@wordpress/i18n";
 import { RequestParticipant } from "../../models/request-participant";
-import { ParticipantInfo } from "./PariticipantInfo";
+import { ParticipantInfo } from "./ParticipantInfo";
 
 export function ParticipantsCard({ participants }: { participants: RequestParticipant[] }) {
 
     if (participants.length === 0) {
         return (
-            <Card sx={{ p: 2, mb: 2 }}>
-                <Typography>No participants available.</Typography>
+            <Card>
+                <CardBody>{__("No participants available.", "wolf-membership")}</CardBody>
             </Card>
         );
     }
     return (<>
         {participants.map((participant, index) => (
-            <Accordion key={index}>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls={`panel${index}-content`}
-                    id={`panel${index}-header`}
-                >
-                    <Typography component="span">{participant.firstname} {participant.lastname}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
+            <Card key={index}>
+                <CardBody>
+                    <details>
+                        <summary style={{ cursor: "pointer", fontWeight: 600, marginBottom: 12 }}>
+                            {sprintf(__("Participant %s", "wolf-membership"), (index + 1).toString())}
+                        </summary>
                     <ParticipantInfo participant={participant} />
-                </AccordionDetails>
-            </Accordion>
+                    </details>
+                </CardBody>
+            </Card>
         ))}
     </>
     );

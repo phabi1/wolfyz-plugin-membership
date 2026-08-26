@@ -1,17 +1,9 @@
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, useNavigate, useParams } from "react-router";
 import { Lesson } from "../../models/lesson";
 import LessonService from "../../services/lessons";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import { Button } from "@wordpress/components";
+import { __ } from "@wordpress/i18n";
 
 export default function LessonListPage() {
   const { campaignId } = useParams();
@@ -52,87 +44,83 @@ export default function LessonListPage() {
 
   return (
     <>
-      <Typography variant="h4" gutterBottom>
-        Lessons
-      </Typography>
+      <h1>Lessons</h1>
       <div>
         {days.map((day) => (
-          <Box key={day.day} sx={{ mb: 4 }}>
-            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
-              <Typography variant="h6" gutterBottom>
+          <div key={day.day} style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <h2 style={{ margin: 0 }}>
                 {day.title}
-              </Typography>
-              <Button>
-                Add Lesson
+              </h2>
+              <Button variant="secondary" onClick={() => navigate(`/campaign/${campaignId}/lessons/new?day=${day.day}`)}>
+                {__("Add Lesson", "wolf-membership")}
               </Button>
-            </Box>
-            <Paper>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell width={'50%'}>Title</TableCell>
-                      <TableCell width={'10%'}>Start Time</TableCell>
-                      <TableCell width={'10%'}>End Time</TableCell>
-                      <TableCell width={'10%'}>Age Range</TableCell>
-                      <TableCell width={'10%'}>Max Participants</TableCell>
-                      <TableCell width={'10%'}></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+            </div>
+            <div style={{ border: '1px solid #dcdcde', borderRadius: 8, overflow: 'hidden', background: "#fff" }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: '50%', textAlign: 'left', padding: 10, borderBottom: '1px solid #dcdcde' }}>Title</th>
+                      <th style={{ width: '10%', textAlign: 'left', padding: 10, borderBottom: '1px solid #dcdcde' }}>Start Time</th>
+                      <th style={{ width: '10%', textAlign: 'left', padding: 10, borderBottom: '1px solid #dcdcde' }}>End Time</th>
+                      <th style={{ width: '10%', textAlign: 'left', padding: 10, borderBottom: '1px solid #dcdcde' }}>Age Range</th>
+                      <th style={{ width: '10%', textAlign: 'left', padding: 10, borderBottom: '1px solid #dcdcde' }}>Max Participants</th>
+                      <th style={{ width: '10%', textAlign: 'right', padding: 10, borderBottom: '1px solid #dcdcde' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {day.lessons.length > 0 ? (
                       day.lessons.map((lesson) => (
-                        <TableRow
+                        <tr
                           key={lesson.id}
-                          hover
                           onClick={() =>
                             navigate(
                               `/campaigns/${campaignId}/lessons/${lesson.id}`,
                             )
                           }
-                          sx={{ cursor: "pointer" }}
+                          style={{ cursor: 'pointer' }}
                         >
-                          <TableCell>{lesson.title}</TableCell>
-                          <TableCell>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1' }}>{lesson.title}</td>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1' }}>
                             {formatTime(lesson.lesson_start)}
-                          </TableCell>
-                          <TableCell>{formatTime(lesson.lesson_end)}</TableCell>
-                          <TableCell>
+                          </td>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1' }}>{formatTime(lesson.lesson_end)}</td>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1' }}>
                             {lesson.age_min && lesson.age_max
                               ? `${lesson.age_min} - ${lesson.age_max} years`
                               : "All Ages"}
-                          </TableCell>
-                          <TableCell>
+                          </td>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1' }}>
                             {lesson.participant_max || "Unlimited"}
-                          </TableCell>
-                          <TableCell align="right">
+                          </td>
+                          <td style={{ padding: 10, borderBottom: '1px solid #f0f0f1', textAlign: 'right' }}>
                             <Button
-                              variant="outlined"
-                              size="small"
+                              variant="secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(
-                                  `/campaigns/${campaignId}/lessons/${lesson.id}/edit`,
+                                  `/campaign/${campaignId}/lessons/${lesson.id}/edit`,
                                 );
                               }}
                             >
-                              Edit
+                              {__("Edit", "wolf-membership")}
                             </Button>
-                          </TableCell>
-                        </TableRow>
+                          </td>
+                        </tr>
                       ))
                     ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">
-                          No lessons available
-                        </TableCell>
-                      </TableRow>
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: 12 }}>
+                          {__("No lessons available", "wolf-membership")}
+                        </td>
+                      </tr>
                     )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Paper>
-          </Box>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
       <Outlet />

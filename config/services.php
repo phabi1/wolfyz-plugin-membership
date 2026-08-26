@@ -232,6 +232,18 @@ return [
             ]
         ]
     ],
+    'wolf-memberships.use_case.pay' => [
+        'class' => \Wolf\Memberships\UseCase\PayUseCase::class,
+        'arguments' => [
+            '@wolf.use_case_bus'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.pay'
+            ]
+        ]
+    ],
     'wolf-memberships.use_case.mark_as_approved_request' => [
         'class' => \Wolf\Memberships\UseCase\MarkAsApprovedRequestUseCase::class,
         'arguments' => [

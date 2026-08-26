@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-import Snackbar from '@mui/material/Snackbar';
+import { Notice } from '@wordpress/components';
 
 export const ToastContext = createContext< {
 	position: {
@@ -69,6 +69,10 @@ export const ToastProvider: React.FC< React.PropsWithChildren< {} > > = ( {
 		console.log( 'Showing toast:', toast );
 
 		setToasts( ( prevToasts ) => [ ...prevToasts, toast ] );
+
+		window.setTimeout( () => {
+			hideToast( id );
+		}, toast.duration );
 	};
 
 	const hideToast = ( id: string ) => {
@@ -88,16 +92,28 @@ export const ToastProvider: React.FC< React.PropsWithChildren< {} > > = ( {
 		>
 			{ children }
 
-			{ toasts.map( ( toast ) => (
-				<Snackbar
-					key={ toast.id }
-					open={ true }
-					anchorOrigin={ toast.position }
-					message={ toast.message }
-					autoHideDuration={ toast.duration }
-					onClose={ () => hideToast( toast.id ) }
-				/>
-			) ) }
+			<div
+				style={ {
+					position: 'fixed',
+					right: 16,
+					bottom: 16,
+					display: 'grid',
+					gap: 8,
+					zIndex: 10000,
+					maxWidth: 420,
+				} }
+			>
+				{ toasts.map( ( toast ) => (
+					<Notice
+						key={ toast.id }
+						status={ toast.severity }
+						onRemove={ () => hideToast( toast.id ) }
+						isDismissible={ true }
+					>
+						{ toast.message }
+					</Notice>
+				) ) }
+			</div>
 		</ToastContext.Provider>
 	);
 };

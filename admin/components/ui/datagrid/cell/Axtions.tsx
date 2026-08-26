@@ -1,4 +1,4 @@
-import Button from "@mui/material/Button";
+import { Button } from "@wordpress/components";
 import { DataGridAction } from "../models/action";
 
 export default function DataGridCellActions({
@@ -18,7 +18,7 @@ export default function DataGridCellActions({
     <div>
       {actions.map((action) => (
         <Button
-          variant="outlined"
+          variant="secondary"
           key={action.name}
           onClick={() => handleActionClick(action, row)}
         >

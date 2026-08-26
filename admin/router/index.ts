@@ -45,7 +45,16 @@ export const router = createHashRouter([
       {
         path: "lessons",
         Component: lazy(() => import("../pages/lessons/ListPage.tsx")),
-        children: [],
+        children: [
+          {
+            path: "new",
+            Component: lazy(() => import("../pages/lessons/FormPage.tsx")),
+          },
+          {
+            path: ":lessonId/edit",
+            Component: lazy(() => import("../pages/lessons/FormPage.tsx")),
+          },
+        ],
       },
       {
         path: "periods",

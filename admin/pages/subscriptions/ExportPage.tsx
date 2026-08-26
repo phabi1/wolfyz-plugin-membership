@@ -1,6 +1,5 @@
 import { useParams } from "react-router";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
+import { Modal } from "@wordpress/components";
 import { useEffect } from "react";
 import SubscriptionService from "../../services/subscriptions";
 
@@ -23,12 +22,10 @@ export default function ExportPage() {
     }, [campaignId]);
 
     return (
-        <Dialog open={true} onClose={() => { }}>
-            <DialogContent>
-                <div style={{ padding: 20 }}>
-                    Exporting subscriptions for campaign {campaignId}...
-                </div>
-            </DialogContent>
-        </Dialog>
+        <Modal title="Export subscriptions" onRequestClose={() => { }}>
+            <div style={{ padding: 20 }}>
+                Exporting subscriptions for campaign {campaignId}...
+            </div>
+        </Modal>
     );
 }

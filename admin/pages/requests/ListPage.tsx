@@ -1,7 +1,4 @@
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
+import { TextControl } from "@wordpress/components";
 import { useEffect, useReducer } from "react";
 import { Outlet, useNavigate, useParams } from "react-router";
 import DataGrid from "../../components/ui/Datagrid";
@@ -149,47 +146,33 @@ export default function RequestListPage() {
     <>
       <div className="wrap">
         <Page title="Requests" actions={pageActions}>
-          <Paper sx={{ width: "100%", mb: 2 }}>
-            <Box sx={{ display: "flex", p: 2 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mr: 2,
-                  flex: 1,
-                  gap: 2,
-                }}
-              >
-                <TextField
-                  label="Firstname"
-                  variant="outlined"
-                  onChange={(event) =>
-                    handleFilterChange("firstname", event.target.value)
-                  }
-                />
-                <TextField
-                  label="Lastname"
-                  variant="outlined"
-                  onChange={(event) =>
-                    handleFilterChange("lastname", event.target.value)
-                  }
-                />
-              </Box>
-            </Box>
-          </Paper>
+          <div style={{ width: "100%", marginBottom: 12, border: "1px solid #dcdcde", borderRadius: 8, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", flex: 1, gap: 12, flexWrap: "wrap" }}>
+              <TextControl
+                label="Firstname"
+                onChange={(value) => handleFilterChange("firstname", value)}
+              />
+              <TextControl
+                label="Lastname"
+                onChange={(value) => handleFilterChange("lastname", value)}
+              />
+            </div>
+          </div>
 
           {state.selection.length > 0 && (
             <div>
               <h2>Selected Members</h2>
-              <div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {state.selection.map((request) => (
-                  <Chip key={request.id} label={`${request.firstname} ${request.lastname}`} />
+                  <span key={request.id} style={{ border: "1px solid #dcdcde", borderRadius: 999, padding: "2px 8px" }}>
+                    {`${request.firstname} ${request.lastname}`}
+                  </span>
                 ))}
               </div>
             </div>
           )}
 
-          <Paper sx={{ width: "100%" }}>
+          <div style={{ width: "100%" }}>
             <DataGrid
               rows={state.items}
               total={state.total}
@@ -205,7 +188,7 @@ export default function RequestListPage() {
                 })
               }
             />
-          </Paper>
+          </div>
         </Page>
       </div>
       <Outlet />

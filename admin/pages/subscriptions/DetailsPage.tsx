@@ -1,6 +1,4 @@
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import { Card, CardBody } from "@wordpress/components";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import ContactsForm from "../../components/subscriptions/ContactsForm";
@@ -47,44 +45,44 @@ function SubscriptionDetails({ subscription, member, sessions }: { subscription:
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <MemberAvatar url={member?.avatar_url} gender={member?.gender} />
-        </Box>
-        <Box sx={{ marginBottom: 2 }}>
-          <Typography variant="h4" gutterBottom>
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <h2 style={{ margin: 0 }}>
             {member ? `${member.firstname} ${member.lastname}` : ''}
-          </Typography>
-        </Box>
-      </Box>
-      <Paper sx={{ padding: 2, marginBottom: 2 }}>
-        <Typography variant="h6" gutterBottom>
+          </h2>
+        </div>
+      </div>
+      <Card style={{ marginBottom: 12 }}><CardBody>
+        <p>
           License type: {subscription ? subscription.license_type : ''}
-        </Typography>
-        <Typography variant="h6" gutterBottom>
+        </p>
+        <p>
           Subscribed at: {subscription ? new Date(subscription.subscribed_at * 1000).toLocaleString() : ''}
-        </Typography>
-      </Paper>
-      <Paper sx={{ padding: 2, marginBottom: 2 }}>
-        <Typography variant="h6" gutterBottom>
+        </p>
+      </CardBody></Card>
+      <Card style={{ marginBottom: 12 }}><CardBody>
+        <h3 style={{ marginTop: 0 }}>
           Contacts
-        </Typography>
+        </h3>
         <ContactsForm member={member} contacts={subscription?.contacts || []} onAddContact={handleAddContact} onRemoveContact={handleRemoveContact} />
-      </Paper>
-      <Paper sx={{ padding: 2, marginBottom: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      </CardBody></Card>
+      <Card style={{ marginBottom: 12 }}><CardBody>
+        <h3 style={{ marginTop: 0 }}>
           Sessions
-        </Typography>
+        </h3>
         <SessionsForm subscription={subscription} sessions={sessions} onAddSession={handleAddSession} onRemoveSession={handleRemoveSession} />
-      </Paper>
-      <Paper sx={{ padding: 2, marginBottom: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      </CardBody></Card>
+      <Card style={{ marginBottom: 12 }}><CardBody>
+        <h3 style={{ marginTop: 0 }}>
           Wheels
-        </Typography>
+        </h3>
         <UiCollection items={member?.wheels || []} renderItem={(wheel) => (
           <WheelItem wheel={wheel} />
         )} />
-      </Paper>
+      </CardBody></Card>
     </>
   );
 }

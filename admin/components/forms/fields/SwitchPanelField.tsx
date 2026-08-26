@@ -1,10 +1,6 @@
-import FormControl from '@mui/material/FormControl';
-import Switch from '@mui/material/Switch';
-import Typography from '@mui/material/Typography';
 import { Controller, useFormContext } from 'react-hook-form';
-import Collapse from '@mui/material/Collapse';
 import { PropsWithChildren, useEffect } from 'react';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import { ToggleControl } from '@wordpress/components';
 
 export type SwitchPanelFieldProps = PropsWithChildren< {
 	name: string;
@@ -39,22 +35,12 @@ export default function SwitchPanelField( {
 			defaultValue={ false }
 			render={ ( { field } ) => (
 				<>
-					<FormControlLabel
-						control={
-							<Switch
-								checked={ field.value }
-								onChange={ ( e ) =>
-									field.onChange( e.target.checked )
-								}
-								slotProps={ {
-									input: { 'aria-label': 'controlled' },
-								} }
-							/>
-						}
+					<ToggleControl
 						label={ label }
-						sx={ { mb: 2 } }
+						checked={ !! field.value }
+						onChange={ ( checked ) => field.onChange( checked ) }
 					/>
-					<Collapse in={ field.value }>{ children }</Collapse>
+					{ field.value ? <div>{ children }</div> : null }
 				</>
 			) }
 		/>

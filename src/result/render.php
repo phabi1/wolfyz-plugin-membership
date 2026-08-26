@@ -13,24 +13,24 @@
 
 <?php
 $type = $_GET['type'] ?? '';
-$checkoutId = absint($_GET['checkout_id'] ?? 0);
-$token = sanitize_text_field($_GET['token'] ?? '');
-
-$useCaseBus = \Wolf\Core\Plugin::getContainer()->get('wolf.use_case_bus');
-$result = $useCaseBus->execute('wolf-events.get_checkout_result', [
-	'type' => $type,
-	'checkout_id' => $checkoutId,
-	'token' => $token,
-]);
-
+$externalId = absint($_GET['external_id'] ?? 0);
 ?>
 
-<p <?php echo get_block_wrapper_attributes(); ?>>
+<div <?php echo get_block_wrapper_attributes(); ?>>
+	<?php echo $type ?>
 	<?php
-	if ($result['valid'] ?? false) {
-		esc_html_e('Payment processed successfully!', 'result');
-	} else {
-		esc_html_e('Invalid payment result parameters.', 'result');
-	}
+	if ($type === 'success'):
+		?>
+			<?php esc_html_e('Payment processed successfully!', 'wolf-membership'); ?>
+		<?php
+	elseif ($type === 'error'):
+		?>
+			<?php esc_html_e('Payment failed. Please try again.', 'wolf-membership'); ?>
+		<?php
+	elseif ($type === 'back'):
+		?>
+			<?php esc_html_e('Payment process was canceled. You can try again.', 'wolf-membership'); ?>
+		<?php
+	endif;
 	?>
-</p>
+</div>

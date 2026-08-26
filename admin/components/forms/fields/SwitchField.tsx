@@ -1,7 +1,5 @@
 import { useFormContext, Controller } from 'react-hook-form';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
+import { ToggleControl } from '@wordpress/components';
 
 export interface SwitchFieldProps {
 	name: string;
@@ -16,14 +14,13 @@ export default function SwitchField( { name, label }: SwitchFieldProps ) {
 			control={ control }
 			defaultValue={ false }
 			render={ ( { field } ) => (
-				<FormControl fullWidth sx={ { mb: 2 } }>
-					<FormControlLabel
-						control={
-							<Switch { ...field } checked={ field.value } />
-						}
+				<div style={ { marginBottom: 16 } }>
+					<ToggleControl
 						label={ label }
+						checked={ !! field.value }
+						onChange={ ( value ) => field.onChange( value ) }
 					/>
-				</FormControl>
+				</div>
 			) }
 		/>
 	);

@@ -1,7 +1,4 @@
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
+import { TextControl } from "@wordpress/components";
 import { useEffect, useReducer } from "react";
 import { Outlet, useNavigate, useParams } from "react-router";
 import DataGrid from "../../components/ui/Datagrid";
@@ -9,7 +6,6 @@ import Page from "../../components/ui/Page";
 import { DataGridColumn } from "../../components/ui/datagrid/models/column";
 import { Subscription } from "../../models/subscription";
 import SubscriptionService from "../../services/subscriptions";
-import Avatar from "@mui/material/Avatar";
 import { MemberAvatar } from "../../components/ui/Avatar";
 
 type State = {
@@ -197,54 +193,37 @@ export default function MemberListPage() {
     <>
       <div className="wrap">
         <Page title="Members" actions={pageActions}>
-          <Paper sx={{ width: "100%", mb: 2 }}>
-            <Box sx={{ display: "flex", p: 2 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mr: 2,
-                  flex: 1,
-                  gap: 2,
-                }}
-              >
-                <TextField
-                  label="Firstname"
-                  variant="outlined"
-                  onChange={(event) =>
-                    handleFilterChange("member.firstname", event.target.value)
-                  }
-                />
-                <TextField
-                  label="Lastname"
-                  variant="outlined"
-                  onChange={(event) =>
-                    handleFilterChange("member.lastname", event.target.value)
-                  }
-                />
-                <TextField
-                  label="License"
-                  variant="outlined"
-                  onChange={(event) =>
-                    handleFilterChange("member.license", event.target.value)
-                  }
-                />
-              </Box>
-            </Box>
-          </Paper>
+          <div style={{ width: "100%", marginBottom: 12, border: "1px solid #dcdcde", borderRadius: 8, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", flex: 1, gap: 12, flexWrap: "wrap" }}>
+              <TextControl
+                label="Firstname"
+                onChange={(value) => handleFilterChange("member.firstname", value)}
+              />
+              <TextControl
+                label="Lastname"
+                onChange={(value) => handleFilterChange("member.lastname", value)}
+              />
+              <TextControl
+                label="License"
+                onChange={(value) => handleFilterChange("member.license", value)}
+              />
+            </div>
+          </div>
 
           {state.selection.length > 0 && (
             <div>
               <h2>Selected Members</h2>
-              <div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {state.selection.map((member) => (
-                  <Chip key={member.id} label={member.title} />
+                  <span key={member.id} style={{ border: "1px solid #dcdcde", borderRadius: 999, padding: "2px 8px" }}>
+                    {member.title}
+                  </span>
                 ))}
               </div>
             </div>
           )}
 
-          <Paper sx={{ width: "100%" }}>
+          <div style={{ width: "100%" }}>
             <DataGrid
               rows={state.items}
               total={state.total}
@@ -260,7 +239,7 @@ export default function MemberListPage() {
                 })
               }
             />
-          </Paper>
+          </div>
         </Page>
       </div>
       <Outlet />

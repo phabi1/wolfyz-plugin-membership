@@ -1,7 +1,5 @@
-import Box from "@mui/material/Box";
 import { PropsWithChildren, useMemo } from "react";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import { Button } from "@wordpress/components";
 
 export type Action = {
   name: string;
@@ -46,7 +44,7 @@ function PageActions({ actions }: { actions: Action[] }) {
       {hasPrimaryActions && primaryActions.map((action) => (
         <Button
           key={action.name}
-          variant="contained"
+          variant="primary"
           onClick={() => handleActionClick(action)}
         >
           {action.label}
@@ -73,21 +71,19 @@ function PageHeader({
   actions?: Action[];
 }) {
   return (
-    <Box
-      sx={{ display: "flex", justifyContent: "space-between", gap: 4, mb: 4 }}
+    <div
+      style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 16, flexWrap: "wrap" }}
     >
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          {title}
-        </Typography>
+      <div style={{ marginBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>{title}</h1>
         {subtitle && (
-          <Typography variant="subtitle1" gutterBottom>
+          <p style={{ margin: "6px 0 0", color: "#50575e" }}>
             {subtitle}
-          </Typography>
+          </p>
         )}
-      </Box>
+      </div>
       {actions && <PageActions actions={actions} />}
-    </Box>
+    </div>
   );
 }
 

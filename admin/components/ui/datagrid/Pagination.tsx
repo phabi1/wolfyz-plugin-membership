@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import { Button } from "@wordpress/components";
 
 export default function DataGridPagination({
   page,
@@ -31,13 +30,13 @@ export default function DataGridPagination({
 
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+    <div style={{ display: "flex", justifyContent: "center", padding: 12, gap: 8 }}>
       <Button disabled={!canPrevious} onClick={() => handlePageChange(page - 1)}>
         Previous
       </Button>
       <Button disabled={!canNext} onClick={() => handlePageChange(page + 1)}>
         Next
       </Button>
-    </Box>
+    </div>
   );
 }

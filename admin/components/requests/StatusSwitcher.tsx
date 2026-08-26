@@ -1,12 +1,6 @@
 import { useState, useMemo } from "react";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
 import { __ } from "@wordpress/i18n";
-import TextField from "@mui/material/TextField";
-import InputLabel from "@mui/material/InputLabel";
-import type { SelectChangeEvent } from "@mui/material/Select";
+import { Card, CardHeader, CardBody, Button, SelectControl, TextareaControl } from "@wordpress/components";
 
 export function RequestStatusSwitcher({ value, onChange }: {
     value: string; onChange: (res: {
@@ -49,36 +43,39 @@ export function RequestStatusSwitcher({ value, onChange }: {
         return true;
     }, [status, rejectionReason]);
 
-    const handleStatusChange = (event: SelectChangeEvent) => {
-        setStatus(event.target.value as string);
+    const handleStatusChange = (newValue: string) => {
+        setStatus(newValue);
     };
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Select value={status} onChange={handleStatusChange}>
-                {newStatus.map((statusOption) => (
-                    <MenuItem key={statusOption.name} value={statusOption.name}>
-                        {statusOption.label}
-                    </MenuItem>
-                ))}
-            </Select>
-            {status === "rejected" && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                    <InputLabel htmlFor="rejection-reason">{__("Reason", "wolf-membership")}</InputLabel>
-                    <TextField
-                        id="rejection-reason"
-                        label={__("Reason", "wolf-membership")}
-                        placeholder={__("Enter reason for rejection", "wolf-membership")}
-                        value={rejectionReason}
-                        onChange={(e) => {
-                            setRejectionReason(e.target.value);
-                        }}
-                    />
-                </Box>
-            )}
-            <Button variant="contained" disabled={!canApply} onClick={() => onChange({ status, reason: rejectionReason })}>
-                Apply
-            </Button>
-        </Box>
+        <Card>
+            <CardHeader>{__('Change Request Status', 'wolf-membership')}</CardHeader>
+            <CardBody>
+                <SelectControl
+                    value={status}
+                    label={__("New status", "wolf-membership")}
+                    options={newStatus.map((statusOption) => ({
+                        label: statusOption.label,
+                        value: statusOption.name,
+                    }))}
+                    onChange={handleStatusChange}
+                />
+                {status === "rejected" && (
+                    <div style={{ marginBottom: 12 }}>
+                        <TextareaControl
+                            label={__("Reason", "wolf-membership")}
+                            help={__("Enter reason for rejection", "wolf-membership")}
+                            value={rejectionReason}
+                            onChange={(value) => {
+                                setRejectionReason(value);
+                            }}
+                        />
+                    </div>
+                )}
+                <Button variant="primary" disabled={!canApply} onClick={() => onChange({ status, reason: rejectionReason })}>
+                    {__("Apply", "wolf-membership")}
+                </Button>
+            </CardBody>
+        </Card>
     );
 }

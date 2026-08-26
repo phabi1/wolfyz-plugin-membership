@@ -1,9 +1,4 @@
-import CloseIcon from '@mui/icons-material/Close';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
+import { Button } from '@wordpress/components';
 import {
 	DragDropContext,
 	Draggable,
@@ -47,15 +42,15 @@ export default function UiCollection( {
 		<DragDropContext onDragEnd={ handleDragEnd }>
 			<div>
 				{ onAddItem && (
-					<Button onClick={ onAddItem }>
+					<Button variant="secondary" onClick={ onAddItem }>
 						{ addLabel || 'Add Item' }
 					</Button>
 				) }
 				<div>
 					{ items.length === 0 && (
-						<Box sx={ { padding: 2, textAlign: 'center' } }>
+						<div style={ { padding: 8, textAlign: 'center' } }>
 							{ emptyText || 'No items available.' }
-						</Box>
+						</div>
 					) }
 					<Droppable droppableId="droppable-list">
 						{ ( provided: any ) => (
@@ -70,17 +65,17 @@ export default function UiCollection( {
 										index={ index }
 									>
 										{ ( provided: any, snapshot: any ) => (
-											<Stack
-												direction="row"
-												spacing={ 2 }
-												alignItems="center"
+												<div
 												key={ index }
 												ref={ provided.innerRef }
-												sx={ {
+													style={ {
 													border: '1px solid rgb(220,220,220)',
 													padding: '8px',
 													marginBottom: '8px',
 													borderRadius: '4px',
+														display: 'flex',
+														gap: '8px',
+														alignItems: 'center',
 													...( snapshot.isDragging
 														? {
 																background:
@@ -95,35 +90,37 @@ export default function UiCollection( {
 												{ ...provided.draggableProps }
 											>
 												{ onMoveItems && (
-													<Box
+													<div
 														style={ {
 															cursor: 'move',
+															userSelect: 'none',
 														} }
 														{ ...provided.dragHandleProps }
 													>
-														<DragIndicatorIcon />
-													</Box>
+														::
+													</div>
 												) }
-												<Box sx={ { flex: 1 } }>
+												<div style={ { flex: 1 } }>
 													{ renderItem(
 														item,
 														index
 													) }
-												</Box>
-												<Box>
+												</div>
+												<div>
 													{ onRemoveItem && (
-														<IconButton
+														<Button
+															variant="tertiary"
 															onClick={ () =>
 																onRemoveItem(
 																	index
 																)
 															}
 														>
-															<CloseIcon />
-														</IconButton>
+															x
+														</Button>
 													) }
-												</Box>
-											</Stack>
+												</div>
+											</div>
 										) }
 									</Draggable>
 								) ) }

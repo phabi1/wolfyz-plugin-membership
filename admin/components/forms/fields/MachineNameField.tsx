@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
+import { Button, TextControl } from '@wordpress/components';
 import slugify from 'slugify';
 
 export interface MachineNameFieldProps {
@@ -40,45 +35,31 @@ export default function MachineNameField( {
 			name={ name }
 			control={ control }
 			render={ ( { field, fieldState } ) => (
-				<FormControl
-					fullWidth
-					error={ !! fieldState.error }
-					sx={ { mb: 2 } }
-				>
-					<TextField
-						{ ...field }
-						label={ label }
-						type="text"
-						error={ !! fieldState.error }
-						value={ field.value || '' }
-						onChange={ ( e ) => {
-							field.onChange( e.target.value );
-						} }
-						disabled={ locked }
-						helperText={
-							fieldState.error ? fieldState.error.message : ''
-						}
-						slotProps={ {
-							input: {
-								endAdornment: (
-									<InputAdornment position="end">
-										<IconButton
-											onClick={ () =>
-												setLocked( ! locked )
-											}
-										>
-											{ locked ? (
-												<LockOutlinedIcon />
-											) : (
-												<LockOpenIcon />
-											) }
-										</IconButton>
-									</InputAdornment>
-								),
-							},
-						} }
-					/>
-				</FormControl>
+				<div style={ { marginBottom: 16 } }>
+					<div style={ { display: 'flex', alignItems: 'flex-end', gap: 8 } }>
+						<div style={ { flex: 1 } }>
+							<TextControl
+								{ ...field }
+								label={ label }
+								type="text"
+								value={ field.value || '' }
+								onChange={ ( value ) => {
+									field.onChange( value );
+								} }
+								disabled={ locked }
+								help={
+									fieldState.error ? fieldState.error.message : undefined
+								}
+							/>
+						</div>
+						<Button
+							variant="secondary"
+							onClick={ () => setLocked( ! locked ) }
+						>
+							{ locked ? 'Unlock' : 'Lock' }
+						</Button>
+					</div>
+				</div>
 			) }
 		/>
 	);

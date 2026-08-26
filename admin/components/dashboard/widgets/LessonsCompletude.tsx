@@ -1,4 +1,4 @@
-import LinearProgress from "@mui/material/LinearProgress";
+import { Spinner } from "@wordpress/components";
 import { useEffect, useState, useMemo } from "react";
 import DashboardWidgetCard from "../WidgetCard";
 
@@ -41,16 +41,26 @@ export default function DashboardWidgetLessonsCompletude({ settings }: any) {
 
   return (
     <DashboardWidgetCard title="Lessons Completude">
-      {loading ? <p>Loading...</p> : null}
+      {loading ? <Spinner /> : null}
       {empty ? <p>No lessons available</p> : (
-        <ul>
+        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 12 }}>
           {lessons.map((lesson) => (
-            <li key={lesson.id}>
-              {lesson.title}{" "}
+            <li key={lesson.id} style={{ border: "1px solid #dcdcde", borderRadius: 8, padding: 10 }}>
+              <div style={{ marginBottom: 6 }}>
+                {lesson.title}{" "}
               <span style={{ fontSize: "0.8em", color: "#666" }}>
                 ({lesson.total}/{lesson.max_participants})
               </span>
-              <LinearProgress variant="determinate" value={lesson.completude} />
+              </div>
+              <div style={{ width: "100%", height: 8, background: "#f0f0f1", borderRadius: 999, overflow: "hidden" }}>
+                <div
+                  style={{
+                    width: `${Math.max(0, Math.min(100, lesson.completude))}%`,
+                    height: "100%",
+                    background: "linear-gradient(90deg, #2271b1 0%, #72aee6 100%)",
+                  }}
+                />
+              </div>
             </li>
           ))}
         </ul>

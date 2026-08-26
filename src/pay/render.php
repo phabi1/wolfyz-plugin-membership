@@ -60,111 +60,12 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 		return;
 	}
 
-	$externalId = 'membership:' . $campaign->id . ':' . $request->id;
-
-	if ($paymentMethod === 'credit_card') {
-		$amount = (int) $pay['total_amount'];
-
-		$paymentMethod = sanitize_text_field($_GET['payment_method']);
-		$res = $useCaseBus->execute('wolf-billing.create_payment', [
-			'amount' => $amount,
-			'currency' => 'EUR',
-			'payment_method' => 'multiplehelloasso',
-			'name' => 'Inscription à l\'événement ' . $campaign->title,
-			'payer' => [
-				'first_name' => $request->firstname,
-				'last_name' => $request->lastname,
-				'email' => $request->email
-			],
-			'metadata' => ['external_id' => $externalId]
-		]);
-	} elseif ($paymentMethod === 'credit_card_x3') {
-
-		$periods = 3;
-		$total_amount = (int) $pay['total_amount'];
-
-		$fees = 0;
-		$discount = 0;
-		$amount = 0;
-		foreach ($pay['items'] as $item) {
-			if ($item['type'] === 'fee') {
-				$fees += (int) $item['amount'];
-			} elseif ($item['type'] === 'discount') {
-				$amount -= (int) $item['amount'];
-			} else {
-				$amount += (int) $item['amount'];
-			}
-		}
-
-		$baseAmount = floor($amount / $periods);
-
-		$terms = [];
-		$terms[] = [
-			'amount' => $baseAmount + $fees,
-			'date' => strtotime('+0 month'),
-		];
-		$amount -= $baseAmount;
-
-		for ($i = 1; $i < $periods; $i++) {
-			$terms[] = [
-				'amount' => $baseAmount,
-				'date' => strtotime('+' . $i . ' month'),
-			];
-
-			$amount -= $baseAmount;
-		}
-
-		// Regularize the last term to account for any rounding differences
-		if ($amount > 0) {
-			$terms[count($terms) - 1]['amount'] += $amount;
-		}
-
-		$paymentMethod = sanitize_text_field($_GET['payment_method']);
-		$res = $useCaseBus->execute('wolf-billing.create_payment', [
-			'amount' => $total_amount,
-			'currency' => 'EUR',
-			'payment_method' => 'multiplehelloasso',
-			'name' => 'Inscription à l\'événement ' . $campaign->title,
-			'payer' => [
-				'first_name' => $request->firstname,
-				'last_name' => $request->lastname,
-				'email' => $request->email
-			],
-			'items' => $terms,
-			'metadata' => ['external_id' => $externalId]
-		]);
-	} elseif ($paymentMethod === 'bank_transfer') {
-		$amount = (int) $pay['total_amount'];
-		$res = $useCaseBus->execute('wolf-billing.create_payment', [
-			'amount' => $amount,
-			'currency' => 'EUR',
-			'payment_method' => 'bank_transfer',
-			'name' => 'Inscription à l\'événement ' . $campaign->title,
-			'payer' => [
-				'first_name' => $request->firstname,
-				'last_name' => $request->lastname,
-				'email' => $request->email
-			],
-			'metadata' => ['external_id' => $externalId]
-		]);
-	} elseif ($paymentMethod === 'check') {
-		$amount = (int) $pay['total_amount'];
-		$res = $useCaseBus->execute('wolf-billing.create_payment', [
-			'amount' => $amount,
-			'currency' => 'EUR',
-			'payment_method' => 'check',
-			'name' => 'Inscription à l\'événement ' . $campaign->title,
-			'payer' => [
-				'first_name' => $request->firstname,
-				'last_name' => $request->lastname,
-				'email' => $request->email
-			],
-			'metadata' => ['external_id' => $externalId]
-		]);
-	} else {
-		echo '<p>' . esc_html__('Invalid payment method.', 'wolf-membership') . '</p>';
-		return;
-	}
+	$res = $useCaseBus->execute('wolf-memberships.pay', [
+		'campaign' => $campaign,
+		'request' => $request,
+		'payment_method' => $paymentMethod,
+		'pay' => $pay,
+	]);
 
 	if (is_string($res['redirect_url'] ?? '')) {
 		wp_redirect($res['redirect_url']);

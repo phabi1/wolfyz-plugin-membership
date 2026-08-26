@@ -1,13 +1,6 @@
-import Timeline from '@mui/lab/Timeline';
-import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
-import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineSeparator from '@mui/lab/TimelineSeparator';
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import { Card, CardBody, CardHeader } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
-import React from "react";
+import React, { useMemo } from "react";
 import { RequestHistoryItem } from "../../models/request-history";
 
 type ActionProps = { item: RequestHistoryItem };
@@ -15,9 +8,9 @@ type ActionProps = { item: RequestHistoryItem };
 
 const RejectedAction = ({ item }: ActionProps) => {
     return (
-        <Box>
-            {item.params['reason'] && <Typography>Reason: {item.params['reason']}</Typography>}
-        </Box>
+        <div>
+            {item.params['reason'] && <p style={{ margin: "4px 0 0" }}>Reason: {item.params['reason']}</p>}
+        </div>
     );
 }
 
@@ -26,31 +19,39 @@ const actions: { [key: string]: React.ComponentType<ActionProps> } = {
 };
 
 export function RequestHistory({ history }: { history: RequestHistoryItem[] }) {
-    if (history.length === 0) {
-        return <p>No history available.</p>;
-    }
 
-    return (
-        <Timeline>
-            {history.map((item) => {
+    const items = useMemo(() => {
+        return [...history].reverse();
+    }, [history]);
+
+    const render = items.length > 0 ? (
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+            {items.map((item) => {
                 const ActionComponent = actions[item.status] || (() => <></>);
                 return (
-                    <TimelineItem key={item.id}>
-                        <TimelineSeparator>
-                            <TimelineDot />
-                            <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                            <Typography variant="body2">{item.status}</Typography>
-                            <ActionComponent item={item} />
-                            <Typography variant="body2">{__(`By {name} on {date}`, 'wolf-membership')
+                    <li key={item.id} style={{ padding: "10px 12px", border: "1px solid #ddd", borderRadius: 6 }}>
+                        <p style={{ margin: 0, fontWeight: 600 }}>{item.status}</p>
+                        <ActionComponent item={item} />
+                        <p style={{ margin: "6px 0 0", color: "#50575e", fontSize: 12 }}>
+                            {__(`By {name} on {date}`, 'wolf-membership')
                                 .replace('{name}', item.changed_by?.display_name || "Unknown")
                                 .replace('{date}', new Date(item.created_at).toLocaleString())
-                            }</Typography>
-                        </TimelineContent>
-                    </TimelineItem>
+                            }
+                        </p>
+                    </li>
                 );
             })}
-        </Timeline>
+        </ul>
+    ) : (
+        <p>{__('No history available.', 'wolf-membership')}</p>
+    );
+
+    return (
+        <Card>
+            <CardHeader>{__('Request History', 'wolf-membership')}</CardHeader>
+            <CardBody>
+                {render}
+            </CardBody>
+        </Card>
     );
 }

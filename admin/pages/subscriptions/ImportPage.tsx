@@ -1,14 +1,9 @@
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import Button from "@mui/material/Button";
+import { Button, Modal } from "@wordpress/components";
 import { Link, useNavigate, useParams } from "react-router";
 import Form from "../../components/forms/Form";
 import { useState } from "react";
 import SubscriptionsService from "../../services/subscriptions";
-import Input from "../../components/forms/fields/InputField";
 import { useForm } from "react-hook-form";
-import Box from "@mui/material/Box";
 import FileField from "../../components/forms/fields/FileField";
 
 export default function ImportPage() {
@@ -45,34 +40,31 @@ export default function ImportPage() {
     }
 
     return (
-        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
-            <DialogTitle>Import Members for Campaign {campaignId}</DialogTitle>
-            <DialogContent>
+        <Modal title={`Import Members for Campaign ${campaignId}`} onRequestClose={handleClose}>
                 {view === 'form' && (
                     <Form form={form} onSubmit={handleImport}>
                         <FileField name="file" accept=".csv" />
-                        <Box>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                             <Button type="button" onClick={handleClose}>Close</Button>
-                            <Button type="button" onClick={form.handleSubmit(handleImport)}>Import</Button>
-                        </Box>
+                            <Button variant="primary" type="button" onClick={form.handleSubmit(handleImport)}>Import</Button>
+                        </div>
                     </Form>
                 )}
                 {view === 'processing' && (
                     <div>Processing import...</div>
                 )}
                 {view === 'result' && (
-                    <Box>
+                    <div>
                         <div>Import completed!</div>
                         <Button onClick={handleClose}>Close</Button>
-                    </Box>
+                    </div>
                 )}
                 {view === 'error' && (
-                    <Box>
+                    <div>
                         <div>There was an error during import. Please try again.</div>
                         <Button onClick={handleRetry}>Retry</Button>
-                    </Box>
+                    </div>
                 )}
-            </DialogContent>
-        </Dialog>
+        </Modal>
     );
 }

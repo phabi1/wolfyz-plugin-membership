@@ -3,7 +3,6 @@ import ReactGridLayout, {
   useContainerWidth,
   verticalCompactor,
 } from "react-grid-layout";
-import "react-grid-layout/css/styles.css";
 import DashboardWidgetOutlet from "../components/dashboard/WidgetOutlet";
 import { useParams } from "react-router";
 
@@ -60,13 +59,12 @@ export default function DashboardPage() {
   ]);
   return (
     <>
-      <h1>Dashboard</h1>
       <div ref={containerRef as React.LegacyRef<HTMLDivElement>}>
         {mounted && (
           <ReactGridLayout
             width={width}
             layout={layout}
-            gridConfig={{ cols: 12, rowHeight: 112, margin: [16, 16] }}
+            gridConfig={{ cols: 12, rowHeight: 112 }}
             dragConfig={{ enabled: false, handle: ".handle" }}
             className="layout"
           >

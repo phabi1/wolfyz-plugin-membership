@@ -1,24 +1,19 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { __ } from "@wordpress/i18n";
-import { useEffect, useMemo, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { useParams } from "react-router";
 import { RequestHistory } from "../../components/requests/History";
 import { ParticipantsCard } from "../../components/requests/ParticipantsCard";
 import { PayerCard } from "../../components/requests/PayerCard";
-import Page, { Action as PageAction } from "../../components/ui/Page";
+import { RequestPayCard } from "../../components/requests/PayCard";
+import { RequestStatusSwitcher } from "../../components/requests/StatusSwitcher";
+import Page from "../../components/ui/Page";
 import { Request } from "../../models/request";
 import { RequestHistoryItem } from "../../models/request-history";
 import RequestService from "../../services/requests";
-import Select from "@mui/material/Select";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import MenuItem from "@mui/material/MenuItem";
-import { RequestStatusSwitcher } from "../../components/requests/StatusSwitcher";
 
 interface State {
     item: Request | null;
-    history: RequestHistoryItem[]; // Replace 'any' with the appropriate type for history items
+    history: RequestHistoryItem[];
+    pay: any | null;
     loading: boolean;
 }
 
@@ -28,6 +23,7 @@ type Action =
         payload: {
             item: Request | null;
             history: RequestHistoryItem[];
+            pay: any | null;
         };
     }
     | {
@@ -49,6 +45,7 @@ export default function RequestDetailsPage() {
                         ...state,
                         item: action.payload.item,
                         history: action.payload.history,
+                        pay: action.payload.pay,
                     };
                 default:
                     return state;
@@ -57,6 +54,7 @@ export default function RequestDetailsPage() {
         {
             item: null,
             history: [],
+            pay: null,
             loading: false,
         },
     );
@@ -65,11 +63,14 @@ export default function RequestDetailsPage() {
         dispatch({ type: "setLoading", payload: true });
         try {
             const item = await RequestService.item(campaignId, requestId);
-            const history = await RequestService.history(campaignId, requestId);
-            dispatch({ type: "fetchItem", payload: { item, history } });
+            const [history, pay] = await Promise.all([
+                RequestService.history(campaignId, requestId),
+                RequestService.calculatePay(campaignId, item.data),
+            ]);
+            dispatch({ type: "fetchItem", payload: { item, history, pay } });
         } catch (error) {
             console.error("Error fetching request details:", error);
-            dispatch({ type: "fetchItem", payload: { item: null, history: [] } });
+            dispatch({ type: "fetchItem", payload: { item: null, history: [], pay: null } });
         } finally {
             dispatch({ type: "setLoading", payload: false });
         }
@@ -117,21 +118,17 @@ export default function RequestDetailsPage() {
 
     return (
         <Page title={`Request Details - ${state.item.id}`}>
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                <Box sx={{ flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "row", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ flex: "1 1 640px", minWidth: 320 }}>
                     <PayerCard request={state.item} />
                     <ParticipantsCard participants={state.item.data.participants} />
-                </Box>
-                <Box sx={{ width: 320 }}>
-                    <Paper sx={{ padding: 2, marginBottom: 2 }}>
-                        <RequestStatusSwitcher value={state.item.status} onChange={handleStatusChanged} />
-                    </Paper>
-                    <Typography variant="h6">{__('Request History', 'wolf-membership')}</Typography>
-                    <Paper sx={{ padding: 2, marginTop: 1 }}>
-                        <RequestHistory history={state.history} />
-                    </Paper>
-                </Box>
-            </Box>
+                    {state.pay && <RequestPayCard pay={state.pay} />}
+                </div>
+                <div style={{ width: 320, flex: "0 1 320px" }}>
+                    <RequestStatusSwitcher value={state.item.status} onChange={handleStatusChanged} />
+                    <RequestHistory history={state.history} />
+                </div>
+            </div>
         </Page >
     );
 }

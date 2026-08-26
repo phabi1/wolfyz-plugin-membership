@@ -1,10 +1,3 @@
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import { useMemo } from "react";
 import DataGridCellActions from "./datagrid/cell/Axtions";
 import { DataGridAction } from "./datagrid/models/action";
@@ -56,50 +49,51 @@ export default function DataGrid<T>(options: DataGridOptions<T>) {
   }, [options.columns, actionColumn]);
 
   return (
-    <Paper>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
+    <div style={{ border: "1px solid #dcdcde", borderRadius: 8, overflow: "hidden", background: "#fff" }}>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
               {displayedColumns.map((col) => (
-                <TableCell key={col.name} style={{ width: col.width }}>
+                <th key={col.name} style={{ width: col.width, textAlign: "left", padding: 10, borderBottom: "1px solid #dcdcde" }}>
                   {col.header}
-                </TableCell>
+                </th>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
+            </tr>
+          </thead>
+          <tbody>
             {options.loading ? (
-              <TableRow>
-                <TableCell colSpan={displayedColumns.length} align="center">
+              <tr>
+                <td colSpan={displayedColumns.length} style={{ textAlign: "center", padding: 12 }}>
                   Loading...
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : null}
             {options.rows.length === 0 && !options.loading ? (
-              <TableRow>
-                <TableCell colSpan={displayedColumns.length} align="center">
+              <tr>
+                <td colSpan={displayedColumns.length} style={{ textAlign: "center", padding: 12 }}>
                   No data
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               options.rows.map((row, index) => (
-                <TableRow
+                <tr
                   key={index}
                   hover
                   onClick={() => options.onRowClick?.(row)}
+                  style={{ cursor: options.onRowClick ? "pointer" : "default" }}
                 >
                   {displayedColumns.map((col) => (
-                    <TableCell key={col.name} style={{ width: col.width }}>
+                    <td key={col.name} style={{ width: col.width, padding: 10, borderBottom: "1px solid #f0f0f1" }}>
                       <DataGridCellOutlet column={col} row={row} />
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
       <DataGridPagination
         page={options.page || 0}
         pageSize={options.pageSize || 10}
@@ -111,6 +105,6 @@ export default function DataGrid<T>(options: DataGridOptions<T>) {
           })
         }
       />
-    </Paper>
+    </div>
   );
 }

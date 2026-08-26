@@ -1,3 +1,4 @@
+import { Pay } from "../models/pay";
 import { Request } from "../models/request";
 import { RequestHistoryItem } from "../models/request-history";
 
@@ -91,6 +92,22 @@ class RequestService {
     const data = await res.json();
 
     return data.data;
+  }
+
+  async calculatePay(campaignId: string, data: any): Promise<Pay> {
+    const res = await fetch(
+      `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration/calculate-total`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    const responseData = await res.json();
+
+    return responseData;
   }
 
   private serialize(data: any) {

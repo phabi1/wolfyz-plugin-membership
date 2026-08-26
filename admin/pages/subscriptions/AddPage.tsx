@@ -1,8 +1,4 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+import { Button, Modal } from "@wordpress/components";
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import MembersServices from "../../services/members";
@@ -77,19 +73,16 @@ export default function MemberAddPage() {
   return (
 
     <Form form={form} onSubmit={handleSave}>
-      <Dialog open={true} onClose={() => navigate(-1)}>
-        <DialogTitle>Add Member</DialogTitle>
-        <DialogContent>
+      <Modal title="Add Member" onRequestClose={() => navigate(-1)}>
           <InputField name="firstname" label="First Name" />
           <InputField name="lastname" label="Last Name" />
           <InputField name="birthdate" label="Birthdate" type="date" />
 
-        </DialogContent>
-        <DialogActions>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <Button onClick={() => navigate(-1)}>Cancel</Button>
-          <Button type="button" onClick={form.handleSubmit(handleSave)} disabled={!canSave}>Save</Button>
-        </DialogActions>
-      </Dialog>
+          <Button variant="primary" type="button" onClick={form.handleSubmit(handleSave)} disabled={!canSave}>Save</Button>
+        </div>
+      </Modal>
     </Form >
   );
 }

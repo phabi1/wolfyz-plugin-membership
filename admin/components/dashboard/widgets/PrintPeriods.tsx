@@ -1,6 +1,4 @@
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import { Button, SelectControl } from "@wordpress/components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DashboardWidgetCard from "../WidgetCard";
 
@@ -9,10 +7,6 @@ export default function DashboardWidgetPrintPeriods({ settings }: any) {
   const [selectedPeriod, setSelectedPeriod] = useState("");
 
   const canPrint = useMemo(() => selectedPeriod !== "", [selectedPeriod]);
-
-  const handleSelectChange = (event: any) => {
-    setSelectedPeriod(event.target.value as string);
-  };
 
   const handlePrint = useCallback(() => {
     if (!canPrint) return;
@@ -47,22 +41,25 @@ export default function DashboardWidgetPrintPeriods({ settings }: any) {
   return (
     <DashboardWidgetCard title="Print Periods">
       <div style={{ marginBottom: "16px" }}>
-        <Select value={selectedPeriod} onChange={handleSelectChange} fullWidth>
-          <MenuItem value="">Select a period</MenuItem>
-          {periods.map((period) => (
-            <MenuItem key={period.id} value={period.id}>
-              {period.title}
-            </MenuItem>
-          ))}
-        </Select>
+        <SelectControl
+          label="Period"
+          value={selectedPeriod}
+          options={[
+            { label: "Select a period", value: "" },
+            ...periods.map((period) => ({
+              label: period.title,
+              value: String(period.id),
+            })),
+          ]}
+          onChange={(value) => setSelectedPeriod(value)}
+        />
       </div>
       <div>
         <Button
-          variant="contained"
-          color="primary"
-          fullWidth
+          variant="primary"
           disabled={!canPrint}
           onClick={handlePrint}
+          style={{ width: "100%" }}
         >
           Print
         </Button>

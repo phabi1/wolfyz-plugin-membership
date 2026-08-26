@@ -1,5 +1,3 @@
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
 import { Controller, useFormContext } from 'react-hook-form';
 
 export default function FileField({ name, accept }: any) {
@@ -8,24 +6,16 @@ export default function FileField({ name, accept }: any) {
         <Controller
             name={name}
             control={control}
-            render={({ field, fieldState }) => (
-                <Controller
+            render={({ field: { ref, name, onBlur, onChange } }) => (
+                <input
+                    type="file"
+                    ref={ref}
+                    accept={accept}
                     name={name}
-                    control={control}
-                    render={({ field: { ref, name, onBlur, onChange } }) => {
-                        return (
-                            <input
-                                type="file"
-                                ref={ref}
-                                accept={accept}
-                                name={name}
-                                onBlur={onBlur}
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    onChange(file ? file : null);
-                                }}
-                            />
-                        );
+                    onBlur={onBlur}
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        onChange(file ? file : null);
                     }}
                 />
             )}
