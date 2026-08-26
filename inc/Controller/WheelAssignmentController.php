@@ -8,6 +8,8 @@ class WheelAssignmentController extends EntityController
 {
     protected $entityName = 'wolf-memberships.member_wheel_assignment';
 
+    protected $usePagination = false;
+
     protected function buildFilters($request)
     {
         $filters = parent::buildFilters($request);

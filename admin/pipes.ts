@@ -22,6 +22,14 @@ export function formatDay(day: number): string {
   return days[day] || "";
 }
 
+export function formatDate(date: string | null): string {
+  if (!date) {
+    return "";
+  }
+  const d = new Date(date);
+  return d.toLocaleDateString();
+}
+
 export function formatTime(time: number | null): string {
   if (!time) {
     return "";

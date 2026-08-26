@@ -247,7 +247,7 @@ return [
             'id' => ['type' => Field::TYPE_INTEGER],
             'member_id' => ['type' => Field::TYPE_INTEGER, 'required' => true],
             'wheel_id' => ['type' => Field::TYPE_INTEGER, 'required' => true],
-            'assigned_at' => ['type' => Field::TYPE_DATETIME]
+            'assigned_at' => ['type' => Field::TYPE_DATE]
         ],
         'relations' => [
             'member' => [

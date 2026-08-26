@@ -1,3 +1,5 @@
+import type { WheelAssignment } from "./wheel-assignment";
+
 export type Member = {
   id: number;
   firstname: string;
