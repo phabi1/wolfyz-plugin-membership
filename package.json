@@ -10,8 +10,8 @@
     "packages-update": "wp-scripts packages-update",
     "plugin-zip": "wp-scripts plugin-zip",
     "start": "wp-scripts start --blocks-manifest",
-    "admin:start": "wp-scripts start src/admin/index.js --output-path=build/admin",
-    "admin:build": "wp-scripts build src/admin/index.js --output-path=build/admin"
+    "admin:start": "wp-scripts start admin/index.js --output-path=build/admin",
+    "admin:build": "wp-scripts build admin/index.js --output-path=build/admin"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
