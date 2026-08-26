@@ -2,7 +2,7 @@ import { Request } from "../../models/request";
 import { Card, CardBody, CardHeader } from "@wordpress/components";
 export function PayerCard({ request }: { request: Request }) {
     return (
-        <Card>
+        <Card style={{ marginBottom: 16 }}>
             <CardHeader>
                 {request.firstname} {request.lastname}
             </CardHeader>

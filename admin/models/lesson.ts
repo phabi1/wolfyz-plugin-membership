@@ -6,5 +6,6 @@ export type Lesson = {
     lesson_end: number;
     age_min?: number;
     age_max?: number;
-    participant_max?: number; 
+    participant_nb: number;
+    participant_max: number; 
 }

@@ -1,7 +1,7 @@
 import { __ } from "@wordpress/i18n";
-import type { Lesson } from "../models/lesson";
-import { formatDay, formatTime } from "../pipes";
-import { TEXT_DOMAIN } from "../utils";
+import type { Lesson } from "../../models/lesson";
+import { formatDay, formatTime } from "../../pipes";
+import { TEXT_DOMAIN } from "../../utils";
 
 
 export function Lesson({ lesson }: { lesson: Lesson }) {

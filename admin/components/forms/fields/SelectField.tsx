@@ -16,7 +16,7 @@ export default function SelectField( { name, label, options }: any ) {
 							label: option.label,
 							value: option.value,
 						} ) ) }
-						onChange={ ( value ) => field.onChange( value ) }
+						onChange={ ( value ) => { console.log("SelectField onChange:", value); field.onChange( value ); } }
 						help={ fieldState.error ? fieldState.error.message : undefined }
 					/>
 				</div>

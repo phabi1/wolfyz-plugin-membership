@@ -1,12 +1,15 @@
-import { Card, CardBody, CardHeader } from "@wordpress/components";
+import { Button, Card, CardBody, CardHeader } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { RequestParticipant } from "../../models/request-participant";
+import type { Lesson as LessonModel } from "../../models/lesson";
 import { FilePreview } from "../ui/FilePreview";
 import { Address } from "../ui/Address";
 import { isParticipantMinor } from "../../helpers";
+import { Lesson } from '../ui/Lesson';
 
-export function ParticipantInfo({ participant }: { participant: RequestParticipant }) {
+export function ParticipantInfo({ participant, lessons, title, lessonStatus, hideLessonStatus }: { participant: RequestParticipant, lessons: LessonModel[], title?: string, lessonStatus: string, hideLessonStatus?: boolean }) {
+    const [isExpanded, setIsExpanded] = useState(false);
     const normalize = (value?: string | null) => value?.trim() || "N/A";
     const isProvided = (value?: string | null) => Boolean(value?.trim());
 
@@ -27,12 +30,12 @@ export function ParticipantInfo({ participant }: { participant: RequestParticipa
     const lessonId = participant.lesson_id !== undefined && participant.lesson_id !== null
         ? String(participant.lesson_id).trim()
         : "";
-    const lessonTitle = normalize(participant.lesson_title);
-    const selectedLesson = lessonTitle !== "N/A"
-        ? lessonTitle
-        : lessonId
-            ? `Lesson #${lessonId}`
-            : __("Not selected", "wolf-membership");
+    const selectedLesson = useMemo<LessonModel | null>(() => {
+        if (!lessonId) {
+            return null;
+        }
+        return lessons.find((l) => String(l.id) === lessonId) || null;
+    }, [lessonId, lessons]);
 
     const comment = normalize(participant.comment);
 
@@ -48,41 +51,57 @@ export function ParticipantInfo({ participant }: { participant: RequestParticipa
     const tutor2Email = normalize(participant.tutor2?.email);
     const tutor2Phone = normalize(participant.tutor2?.phone);
 
+    const hasLesson = selectedLesson !== null;
     const hasHealthQuestionnaire = isProvided(participant.health_questionnaire);
     const hasIdentityPhoto = isProvided(participant.identity_photo);
     const hasMedicalCertificate = isProvided(participant.medical_certificate);
 
-    const hasEmail = email !== "N/A";
-    const hasPhone = phone !== "N/A";
-    const hasLesson = selectedLesson !== __("Not selected", "wolf-membership");
-    const completionChecks = [
-        firstname !== "N/A",
-        lastname !== "N/A",
-        birthdate !== "N/A",
-        gender !== "N/A",
-        nationality !== "N/A",
-        hasEmail,
-        hasPhone,
-        licenseType !== "N/A",
-        hasLesson,
-    ];
-    const completionScore = completionChecks.filter(Boolean).length;
-    const completionPercent = Math.round((completionScore / completionChecks.length) * 100);
-
     const agreePhoto = participant.agree_photo === true ? __("Yes", "wolf-membership") : __("No", "wolf-membership");
     const agreeExit = participant.agree_exit === true ? __("Yes", "wolf-membership") : __("No", "wolf-membership");
 
-    const badgeStyle = (ok: boolean) => ({
-        display: "inline-block",
-        padding: "4px 8px",
-        borderRadius: 12,
-        fontSize: 12,
-        lineHeight: "16px",
-        fontWeight: 600,
-        background: ok ? "#dff6dd" : "#fff4e5",
-        color: ok ? "#14532d" : "#7a4b00",
-        border: `1px solid ${ok ? "#86efac" : "#fed7aa"}`,
-    });
+    const badgeStyle = (status: string) => {
+        let style: React.CSSProperties = {};
+        switch (status) {
+            case "ok":
+                style = {
+                    background: "#dff6dd",
+                    color: "#14532d",
+                    border: "1px solid #86efac",
+                };
+                break;
+            case "warning":
+                style = {
+                    background: "#fff4e5",
+                    color: "#7a4b00",
+                    border: "1px solid #fed7aa",
+                };
+                break;
+            case "error":
+                style = {
+                    background: "#fef2f2",
+                    color: "#991b1b",
+                    border: "1px solid #fca5a5",
+                };
+                break;
+            default:
+                style = {
+                    background: "#f3f4f6",
+                    color: "#374151",
+                    border: "1px solid #d1d5db",
+                };
+                break;
+        }
+
+        return {
+            display: "inline-block",
+            padding: "4px 8px",
+            borderRadius: 12,
+            fontSize: 12,
+            lineHeight: "16px",
+            fontWeight: 600,
+            ...style,
+        };
+    };
 
     const sectionTitleStyle = {
         margin: "0 0 8px",
@@ -108,12 +127,29 @@ export function ParticipantInfo({ participant }: { participant: RequestParticipa
     return (
         <Card>
             <CardHeader>
-                <div>
-                    <strong>{firstname} {lastname}</strong>
-                    <p style={{ margin: "4px 0 0", color: "#50575e" }}>{__("Participant profile", "wolf-membership")}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap", width: "100%" }}>
+                    <div>
+                        {title && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#50575e", fontWeight: 600 }}>{title}</p>}
+                        <strong>{firstname} {lastname}</strong>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
+                        {hideLessonStatus ? null : (<div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                            <span style={badgeStyle(lessonStatus)}>
+                                {hasLesson ? __("Lesson selected", "wolf-membership") : __("Lesson not selected", "wolf-membership")}
+                            </span>
+                        </div>)}
+                        <Button
+                            variant="secondary"
+                            onClick={() => setIsExpanded((open) => !open)}
+                            aria-expanded={isExpanded}
+                            icon={isExpanded ? "arrow-up-alt2" : "arrow-down-alt2"}
+                        >
+                            {isExpanded ? __("Collapse", "wolf-membership") : __("Expand", "wolf-membership")}
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
-            <CardBody>
+            {isExpanded && <CardBody>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     <section>
                         <p style={sectionTitleStyle}>{__("Identity", "wolf-membership")}</p>
@@ -140,8 +176,14 @@ export function ParticipantInfo({ participant }: { participant: RequestParticipa
                         <p style={sectionTitleStyle}>{__("Registration", "wolf-membership")}</p>
                         <div style={gridStyle}>
                             <DetailItem label={__("License Type", "wolf-membership")} value={licenseType} />
-                            <DetailItem label={__("Selected Lesson", "wolf-membership")} value={selectedLesson} />
                             <DetailItem label={__("Comment", "wolf-membership")} value={comment} />
+                        </div>
+                    </section>
+
+                    <section>
+                        <p style={sectionTitleStyle}>{__("Sessions", "wolf-membership")}</p>
+                        <div>
+                            {selectedLesson ? <Lesson lesson={selectedLesson} /> : __("Not selected", "wolf-membership")}
                         </div>
                     </section>
 
@@ -197,25 +239,8 @@ export function ParticipantInfo({ participant }: { participant: RequestParticipa
                         </div>
                     </section>
 
-                    <section>
-                        <p style={sectionTitleStyle}>{__("Profile status", "wolf-membership")}</p>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <span style={badgeStyle(hasEmail)}>
-                                {hasEmail ? __("Email provided", "wolf-membership") : __("Email missing", "wolf-membership")}
-                            </span>
-                            <span style={badgeStyle(hasPhone)}>
-                                {hasPhone ? __("Phone provided", "wolf-membership") : __("Phone missing", "wolf-membership")}
-                            </span>
-                            <span style={badgeStyle(hasLesson)}>
-                                {hasLesson ? __("Lesson selected", "wolf-membership") : __("Lesson not selected", "wolf-membership")}
-                            </span>
-                            <span style={badgeStyle(completionPercent === 100)}>
-                                {__("Profile completion", "wolf-membership")}: {completionPercent}%
-                            </span>
-                        </div>
-                    </section>
                 </div>
-            </CardBody>
+            </CardBody>}
         </Card>
     );
 }

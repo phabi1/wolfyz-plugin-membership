@@ -49,6 +49,7 @@ return [
             'lesson_end' => ['type' => Field::TYPE_DATETIME],
             'age_min' => ['type' => Field::TYPE_INTEGER, 'nullable' => true],
             'age_max' => ['type' => Field::TYPE_INTEGER, 'nullable' => true],
+            'participant_nb' => ['type' => Field::TYPE_INTEGER, 'readonly' => true],
             'participant_max' => ['type' => Field::TYPE_INTEGER, 'nullable' => true],
 
         ],

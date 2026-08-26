@@ -2,15 +2,18 @@ import { useEffect, useReducer } from "react";
 import { useParams } from "react-router";
 import { RequestHistory } from "../../components/requests/History";
 import { ParticipantsCard } from "../../components/requests/ParticipantsCard";
-import { PayerCard } from "../../components/requests/PayerCard";
 import { RequestPayCard } from "../../components/requests/PayCard";
+import { PayerCard } from "../../components/requests/PayerCard";
 import { RequestStatusSwitcher } from "../../components/requests/StatusSwitcher";
 import Page from "../../components/ui/Page";
+import { Lesson } from "../../models/lesson";
 import { Request } from "../../models/request";
 import { RequestHistoryItem } from "../../models/request-history";
+import LessonService from "../../services/lessons";
 import RequestService from "../../services/requests";
 
 interface State {
+    lessons: Lesson[];
     item: Request | null;
     history: RequestHistoryItem[];
     pay: any | null;
@@ -18,6 +21,10 @@ interface State {
 }
 
 type Action =
+    | {
+        type: "setLessons";
+        payload: Lesson[];
+    }
     | {
         type: "fetchItem";
         payload: {
@@ -47,17 +54,29 @@ export default function RequestDetailsPage() {
                         history: action.payload.history,
                         pay: action.payload.pay,
                     };
+                case "setLessons":
+                    return { ...state, lessons: action.payload };
                 default:
                     return state;
             }
         },
         {
+            lessons: [],
             item: null,
             history: [],
             pay: null,
             loading: false,
         },
     );
+
+    const fetchLessons = async () => {
+        try {
+            const lessons = await LessonService.items(campaignId!);
+            dispatch({ type: "setLessons", payload: lessons.items });
+        } catch (error) {
+            console.error("Error fetching lessons:", error);
+        }
+    }
 
     const fetchRequestDetails = async (campaignId: string, requestId: string) => {
         dispatch({ type: "setLoading", payload: true });
@@ -75,6 +94,13 @@ export default function RequestDetailsPage() {
             dispatch({ type: "setLoading", payload: false });
         }
     };
+
+    useEffect(() => {
+        if (!campaignId) {
+            return;
+        }
+        fetchLessons();
+    }, [campaignId]);
 
     useEffect(() => {
         if (!campaignId || !requestId) {
@@ -121,7 +147,7 @@ export default function RequestDetailsPage() {
             <div style={{ display: "flex", flexDirection: "row", gap: 16, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 640px", minWidth: 320 }}>
                     <PayerCard request={state.item} />
-                    <ParticipantsCard participants={state.item.data.participants} />
+                    <ParticipantsCard request={state.item} lessons={state.lessons} />
                     {state.pay && <RequestPayCard pay={state.pay} />}
                 </div>
                 <div style={{ width: 320, flex: "0 1 320px" }}>

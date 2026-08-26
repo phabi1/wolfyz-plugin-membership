@@ -48,7 +48,7 @@ export function RequestStatusSwitcher({ value, onChange }: {
     };
 
     return (
-        <Card>
+        <Card style={{ marginBottom: 16 }}>
             <CardHeader>{__('Change Request Status', 'wolf-membership')}</CardHeader>
             <CardBody>
                 <SelectControl

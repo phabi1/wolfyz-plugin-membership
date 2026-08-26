@@ -7,6 +7,7 @@ const DASHBOARD_WIDGETS = {
   'subscriptions-counter': lazy(() => import("./widgets/SubscriptionsCounter.tsx")),
   'lessons-counter': lazy(() => import("./widgets/LessonsCounter.tsx")),
   'periods-counter': lazy(() => import("./widgets/PeriosCounter.tsx")),
+  'current-period': lazy(() => import("./widgets/CurrentPeriod.tsx")),
 };
 
 interface DashboardWidgetOutletProps {
