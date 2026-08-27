@@ -101,7 +101,7 @@ class UpdateRequestUseCase implements UseCaseInterface
     {
         $email = $request->email;
         $context = ['editUrl' => $this->buildEditUrl($campaign, $request)];
-        return $this->mailService->sendMail($email, 'wolf-membership:confirmation', $context);
+        return $this->mailService->sendMail($email, 'wolf-membership:request-confirmation', $context);
 
     }
 

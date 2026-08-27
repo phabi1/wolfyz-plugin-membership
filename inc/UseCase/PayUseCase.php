@@ -74,8 +74,6 @@ class PayUseCase implements UseCaseInterface
         foreach ($pay['items'] as $item) {
             if ($item['type'] === 'fee') {
                 $fees += (int) $item['amount'];
-            } elseif ($item['type'] === 'discount') {
-                $amount -= (int) $item['amount'];
             } else {
                 $amount += (int) $item['amount'];
             }
@@ -105,7 +103,7 @@ class PayUseCase implements UseCaseInterface
         }
 
         return $this->useCaseBus->execute('wolf-billing.create_payment', [
-            'amount' => $amount,
+            'amount' => $pay['total_amount'],
             'currency' => 'EUR',
             'payment_method' => 'multiplehelloasso',
             'name' => $this->buildTitle($campaign),

@@ -40,7 +40,7 @@
                         <tr>
                             <td style="padding: 36px 32px 24px 32px;">
                                 <p style="margin: 0 0 18px; font-size: 18px; line-height: 1.6; color: #1f2937;">
-                                    Merci pour votre inscription. Vous pouvez modifier votre dossier à tout moment en cliquant sur le bouton ci-dessous.
+                                    Merci pour votre inscription. Vous pouvez modifier votre dossier à tout moment avant la validation en cliquant sur le bouton ci-dessous.
                                 </p>
 
                                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 28px auto;">
