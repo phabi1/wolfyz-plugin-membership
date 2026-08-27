@@ -9,23 +9,11 @@ class Migration_0_0_7 implements MigrationInterface
 
     public function up()
     {
-        $this->addWeightToWheelTable();
         $this->addWheels();
     }
 
     public function down()
     {
-    }
-
-    private function addWeightToWheelTable()
-    {
-        global $wpdb;
-
-        $tableName = $wpdb->prefix . 'wolf_memberships_wheel';
-
-        if ($wpdb->get_var("SHOW COLUMNS FROM `$tableName` LIKE 'weight'") === null) {
-            $wpdb->query("ALTER TABLE `$tableName` ADD `weight` INT NOT NULL DEFAULT 0");
-        }
     }
 
     private function addWheels()
@@ -36,24 +24,66 @@ class Migration_0_0_7 implements MigrationInterface
 
         $wheels = [
             [
-                'title' => 'Jaune', 'color' => '#FFFF00', 'weight' => 1
-            ],
-            [
-                'title' => 'Rouge', 'color' => '#FF0000', 'weight' => 4
-            ],
-            [
-                'title' => 'Verte', 'color' => '#00FF00', 'weight' => 2
-            ],
-            [
-                'title' => 'Bleue', 'color' => '#0000FF', 'weight' => 3
-            ],
-            [
-                'title' => 'Noire', 'color' => '#000000', 'weight' => 5
+                'title' => 'Jaune',
+                'color' => '#FFFF00',
+                'children' => [
+                    [
+                        'title' => 'Verte',
+                        'color' => '#00FF00',
+                        'children' => [
+                            [
+                                'title' => 'Bleue',
+                                'color' => '#0000FF',
+                                'children' => [
+                                    [
+                                        'title' => 'Rouge',
+                                        'color' => '#FF0000',
+                                        'children' => [
+                                            [
+                                                'title' => 'Noire',
+                                                'color' => '#000000',
+                                            ],
+                                        ]
+                                    ],
+                                    [
+                                        'title' => 'Rouge SkatePark',
+                                        'color' => '#FF0000',
+                                        'children' => [
+                                            [
+                                                'title' => 'Noire SkatePark',
+                                                'color' => '#000000',
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ],
+                        ]
+                    ],
+                ]
             ],
         ];
 
+        $this->insertWheels($wheels, null, '/', $tableName);
+
+    }
+
+    private function insertWheels($wheels, $parent, $path, $tableName)
+    {
+        global $wpdb;
+
         foreach ($wheels as $wheel) {
-            $wpdb->insert($tableName, $wheel);
+            $wpdb->insert($tableName, [
+                'title' => $wheel['title'],
+                'color' => $wheel['color'],
+                'parent_id' => $parent,
+                'parent_path' => $path,
+            ]);
+
+            $id = $wpdb->insert_id;
+
+            if (isset($wheel['children']) && !empty($wheel['children'])) {
+                $this->insertWheels($wheel['children'], $id, $path . $id . '/', $tableName);
+            }
         }
     }
 }

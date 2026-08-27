@@ -16,6 +16,6 @@ require __DIR__ . '/vendor/autoload.php';
 
 define('WOLF_MEMBERSHIP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WOLF_MEMBERSHIP_PLUGIN_VERSION', '0.0.7');
-
+    
 $plugin = new \Wolf\Memberships\Plugin();
 $plugin->run();

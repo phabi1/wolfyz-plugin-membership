@@ -78,6 +78,10 @@ export const router = createHashRouter([
         path: "requests/:requestId",
         Component: lazy(() => import("../pages/requests/DetailsPage.tsx")),
       },
+      {
+        path: "wheels",
+        Component: lazy(() => import("../pages/wheels/ListPage.tsx")),
+      }
     ],
   },
 ]);

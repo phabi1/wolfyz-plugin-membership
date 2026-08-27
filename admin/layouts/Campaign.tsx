@@ -11,6 +11,7 @@ export default function LayoutCampaign() {
   const links = [
     { to: `/campaign/${campaignId || ""}`, label: "Dashboard", end: true },
     { to: `/campaign/${campaignId || ""}/subscriptions`, label: "Members" },
+    { to: `/campaign/${campaignId || ""}/wheels`, label: "Wheels" },
     { to: `/campaign/${campaignId || ""}/lessons`, label: "Lessons" },
     { to: `/campaign/${campaignId || ""}/periods`, label: "Schedulers" },
     { to: `/campaign/${campaignId || ""}/requests`, label: "Requests" },

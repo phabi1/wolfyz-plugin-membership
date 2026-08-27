@@ -238,7 +238,11 @@ return [
         'fields' => [
             'id' => ['type' => Field::TYPE_INTEGER],
             'title' => ['type' => Field::TYPE_STRING, 'required' => true],
-            'color' => ['type' => Field::TYPE_STRING, 'required' => true]
+            'color' => ['type' => Field::TYPE_STRING, 'required' => true],
+            'parent_id' => ['type' => Field::TYPE_INTEGER, 'nullable' => true],
+            'parent_path' => ['type' => Field::TYPE_STRING, 'nullable' => true, 'readonly' => true, 'hidden' => true],
+            'created_at' => ['type' => Field::TYPE_DATE, 'required' => true],
+            'updated_at' => ['type' => Field::TYPE_DATE, 'required' => true]
         ]
     ],
     'wolf-memberships.member_wheel_assignment' => [
