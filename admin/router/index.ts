@@ -79,6 +79,10 @@ export const router = createHashRouter([
         Component: lazy(() => import("../pages/requests/DetailsPage.tsx")),
       },
       {
+        path: "settings",
+        Component: lazy(() => import("../pages/campaigns/SettingsPage.tsx")),
+      },
+      {
         path: "wheels",
         Component: lazy(() => import("../pages/wheels/ListPage.tsx")),
       }

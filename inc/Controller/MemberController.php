@@ -37,31 +37,47 @@ class MemberController extends EntityController
             return new \WP_Error('birthdate_required', 'Birthdate parameter is required', ['status' => 400]);
         }
 
-        $exists = $this->useCaseBus->execute('wolf-memberships.exists_member', [
+        // Check if valid format for birthdate
+        if (!\DateTime::createFromFormat('Y-m-d', $birthdate)) {
+            return new \WP_Error('invalid_birthdate', 'Birthdate must be in YYYY-MM-DD format', ['status' => 400]);
+        }
+
+        $suggestions = !!$request->get_param('suggestions');
+
+        $result = $this->useCaseBus->execute('wolf-memberships.exists_member', [
             'lastname' => $lastname,
             'firstname' => $firstname,
-            'birthdate' => $birthdate
+            'birthdate' => $birthdate,
+            'suggestions' => $suggestions,
+            'minScore' => $request->get_param('score_min') ?? 0,
         ]);
 
         return [
-            'exists' => $exists ? true : false,
-            'id' => $exists ? $exists : null
+            'exists' => $result['exists'],
+            'id' => $result['id'] ?? null,
+            'suggestions' => $result['suggestions'] ?? []
         ];
     }
 
-    public function generateHashAction($request)
+    public function hashAction($request)
     {
+        global $wpdb;
         $memberHelper = $this->getService('wolf-memberships.helper.member');
-        $entityManager = $this->getService('wolf.entity.manager');
-        $memberRepository = $entityManager->getRepository('wolf-memberships.member');
-        $members = $memberRepository->find();
+
+       $members = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}wolf_memberships_member");
 
         foreach ($members as $member) {
             $hash = $memberHelper->generateHash($member->firstname, $member->lastname, $member->birthdate);
-            $memberRepository->update($member->id, [
-                'hash' => $hash
-            ]);
+            $wpdb->update(
+                "{$wpdb->prefix}wolf_memberships_member",
+                ['hash' => $hash],
+                ['id' => $member->id],
+            );
         }
+
+        return [
+            'success' => true
+        ];
     }
 
     public function importAction($request)

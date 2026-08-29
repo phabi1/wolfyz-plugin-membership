@@ -23,18 +23,26 @@ class ExistsMemberUseCase implements UseCaseInterface
         $this->memberHelper = $memberHelper;
     }
 
-    public function execute(array $data = [])
+    public function execute(array $params = [])
     {
-        $lastname = $data['lastname'] ?? null;
-        $firstname = $data['firstname'] ?? null;
-        $birthdate = $data['birthdate'] ?? null;
+        $lastname = $params['lastname'] ?? null;
+        $firstname = $params['firstname'] ?? null;
+        $birthdate = $params['birthdate'] ?? null;
 
         if (!$lastname || !$firstname || !$birthdate) {
             throw new \InvalidArgumentException('Lastname, firstname and birthdate are required');
         }
 
-        $hash = $this->memberHelper->generateHash($lastname, $firstname, $birthdate);
+        $hash = $this->memberHelper->generateHash($firstname, $lastname, $birthdate);
 
-        return $this->memberRepository->existsHash($hash);
+        $id = $this->memberRepository->existsHash($hash);
+        $exists = $id !== null;
+
+        $suggestions = [];
+        if (!$exists && $params['suggestions'] ?? false) {
+            $suggestions = $this->memberRepository->findSuggestions($lastname, $firstname, $birthdate, $params['minScore'] ?? 0);
+        }
+
+        return ['exists' => $exists, 'id' => $id, 'suggestions' => $suggestions];
     }
 }

@@ -1,5 +1,4 @@
 import { Member } from "../models/member";
-import { MemberDetails } from "../models/member-details";
 
 class MemberService {
   private endpoint = "/wp-json/wolf-memberships/v1/members";
@@ -40,17 +39,10 @@ class MemberService {
     };
   }
 
-  async item(memberId: string): Promise<MemberDetails> {
+  async item(memberId: string): Promise<Member> {
     const res = await fetch(`${this.endpoint}/${memberId}`);
     const data = await res.json();
     const entity = this.unserialize(data);
-
-    const [wheels] = await Promise.all([
-      this.fetchWheels(memberId),
-    ]);
-
-    entity.wheels = wheels;
-
     return entity;
   }
 
@@ -84,33 +76,43 @@ class MemberService {
     });
   }
 
-  async exists(data: {
-    firstname: string;
-    lastname: string;
-    birthdate: Date;
-  }): Promise<{ exists: boolean; id: number | null }> {
-    const res = await fetch(`${this.endpoint}/exists`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        firstname: data.firstname,
-        lastname: data.lastname,
-        birthdate: this.convertDateToTimestamp(data.birthdate),
-      }),
-    });
+  async exists(
+    data: {
+      firstname: string;
+      lastname: string;
+      birthdate: string;
+    },
+    suggestions?: boolean,
+    minScore?: number,
+  ): Promise<{
+    exists: boolean;
+    id: number | null;
+    suggestions: {
+      id: number;
+      firstname: string;
+      lastname: string;
+      birthdate: Date | null;
+    }[];
+  }> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("firstname", data.firstname);
+    queryParams.append("lastname", data.lastname);
+    queryParams.append("birthdate", data.birthdate);
+    if (suggestions === true) {
+      queryParams.append("suggestions", suggestions.toString());
+      if (minScore !== undefined) {
+        queryParams.append("score_min", minScore.toString());
+      }
+    }
+    const res = await fetch(
+      `${this.endpoint}/exists?${queryParams.toString()}`,
+    );
     const resData = await res.json();
     return {
       exists: resData.exists,
       id: resData.id,
+      suggestions: resData.suggestions,
     };
-  }
-
-  private async fetchWheels(memberId: string) {
-    const res = await fetch(`${this.endpoint}/${memberId}/wheels`);
-    const data = await res.json();
-    return data.items;
   }
 
   /**
@@ -118,7 +120,7 @@ class MemberService {
    */
   private convertDateToTimestamp(date: Date | null): number | null {
     if (!date) return null;
-    return Math.floor(date.getTime() / 1000) - (60);
+    return Math.floor(date.getTime() / 1000) - 60;
   }
 
   private serialize(data: any) {

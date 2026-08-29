@@ -13,6 +13,7 @@ export type PageProps = PropsWithChildren<{
   subtitle?: string;
   actions?: Action[];
   topAction?: React.ReactNode;
+  headerRight?: React.ReactNode;
 }>;
 
 function PageActions({ actions }: { actions: Action[] }) {
@@ -64,11 +65,12 @@ function PageHeader({
   title,
   subtitle,
   actions,
-  topAction,
+  headerRight,
 }: {
   title: string;
   subtitle?: string;
   actions?: Action[];
+  headerRight?: React.ReactNode;
 }) {
   return (
     <div
@@ -82,7 +84,9 @@ function PageHeader({
           </p>
         )}
       </div>
-      {actions && <PageActions actions={actions} />}
+      <div>
+        {headerRight ? <div>{headerRight}</div> : (actions && <PageActions actions={actions} />)}
+      </div>
     </div>
   );
 }
@@ -92,12 +96,13 @@ export default function Page({
   subtitle,
   actions,
   topAction,
+  headerRight,
   children,
 }: PageProps) {
   return (
     <div>
       {topAction && <div>{topAction}</div>}
-      <PageHeader title={title} subtitle={subtitle} actions={actions} />
+      <PageHeader title={title} subtitle={subtitle} actions={actions} headerRight={headerRight} />
       <div>{children}</div>
     </div>
   );

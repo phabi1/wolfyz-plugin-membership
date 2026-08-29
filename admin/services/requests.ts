@@ -6,18 +6,26 @@ class RequestService {
   private endpoint = "/wp-json/wolf-memberships/v1/campaigns";
 
   async items(
-    campaignId: string,
+    campaignId: number,
     options?: {
       filters?: Record<string, string | Record<string, string>>;
       page?: number;
       size?: number;
+      sort?: string;
+      order?: "asc" | "desc";
     },
   ): Promise<{ items: Request[]; total: number }> {
-    const { page = 1, size = 20 } = options || {};
+    const { page = 1, size = 20, sort, order } = options || {};
 
     const queryParams = new URLSearchParams();
     queryParams.append("page", page.toString());
     queryParams.append("size", size.toString());
+    if (sort) {
+      queryParams.append("sort", sort);
+    }
+    if (order) {
+      queryParams.append("order", order);
+    }
     if (options?.filters) {
       let filters: string[] = [];
       Object.entries(options.filters).forEach(([key, value]) => {
@@ -43,7 +51,7 @@ class RequestService {
     };
   }
 
-  async item(campaignId: string, memberId: string): Promise<Request> {
+  async item(campaignId: number, memberId: number): Promise<Request> {
     const res = await fetch(
       `${this.endpoint}/${campaignId}/requests/${memberId}`,
     );
@@ -53,7 +61,22 @@ class RequestService {
     return entity;
   }
 
-  async approve(campaignId: string, requestId: string) {
+  async update(campaignId: number, requestId: number, data: any): Promise<Request> {
+    const res = await fetch(
+      `${this.endpoint}/${campaignId}/requests/${requestId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.serialize(data)),
+      },
+    );
+    const resData = await res.json();
+    return this.unserialize(resData);
+  }
+
+  async approve(campaignId: number, requestId: number) {
     await fetch(
       `${this.endpoint}/${campaignId}/requests/${requestId}/approve`,
       {
@@ -61,7 +84,7 @@ class RequestService {
       },
     );
   }
-  async reject(campaignId: string, requestId: string, reason: string = "") {
+  async reject(campaignId: number, requestId: number, reason: string = "") {
     await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/reject`, {
       method: "POST",
       body: JSON.stringify({ reason }),
@@ -70,21 +93,21 @@ class RequestService {
       },
     });
   }
-  async paid(campaignId: string, requestId: string) {
+  async paid(campaignId: number, requestId: number) {
     await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/paid`, {
       method: "POST",
     });
   }
 
-  async cancel(campaignId: string, requestId: string) {
+  async cancel(campaignId: number, requestId: number) {
     await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/cancel`, {
       method: "POST",
     });
   }
 
   async history(
-    campaignId: string,
-    requestId: string,
+    campaignId: number,
+    requestId: number,
   ): Promise<RequestHistoryItem[]> {
     const res = await fetch(
       `${this.endpoint}/${campaignId}/requests/${requestId}/history`,
@@ -94,12 +117,15 @@ class RequestService {
     return data.data;
   }
 
-  async calculatePay(campaignId: string, data: any): Promise<Pay> {
+  async calculatePay(campaignId: number, data: any, discount?: number): Promise<Pay> {
     const res = await fetch(
       `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration/calculate-total`,
       {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          discount,
+        }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -108,6 +134,12 @@ class RequestService {
     const responseData = await res.json();
 
     return responseData;
+  }
+
+  public async resendPayment(campaignId: number, requestId: number): Promise<void> {
+    await fetch(`${this.endpoint}/${campaignId}/requests/${requestId}/resend-payment`, {
+      method: "POST",
+    });
   }
 
   private serialize(data: any) {

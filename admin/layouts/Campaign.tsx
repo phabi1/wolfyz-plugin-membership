@@ -15,6 +15,7 @@ export default function LayoutCampaign() {
     { to: `/campaign/${campaignId || ""}/lessons`, label: "Lessons" },
     { to: `/campaign/${campaignId || ""}/periods`, label: "Schedulers" },
     { to: `/campaign/${campaignId || ""}/requests`, label: "Requests" },
+    { to: `/campaign/${campaignId || ""}/settings`, label: "Settings" },
   ];
 
   useEffect(() => {

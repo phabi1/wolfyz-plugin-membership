@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { ToastContext } from '../contexts/toast';
 
 export default function useToast() {
@@ -8,11 +8,14 @@ export default function useToast() {
 		throw new Error( 'useToast must be used within a ToastProvider' );
 	}
 
-	return (
-		message: string,
-		severity: 'success' | 'error' | 'info' | 'warning',
-		duration?: number
-	) => {
-		ctx.showToast( message, severity, duration );
-	};
+	return useCallback(
+		(
+			message: string,
+			severity: 'success' | 'error' | 'info' | 'warning',
+			duration?: number
+		) => {
+			ctx.showToast( message, severity, duration );
+		},
+		[ ctx ]
+	);
 }

@@ -16,20 +16,38 @@ class PayUseCase implements UseCaseInterface
 
     public function execute(array $params = [])
     {
-        $paymentMethod = $params['payment_method'] ?? null;
+        $paymentMethodId = $params['payment_method'] ?? null;
 
-        $externalId = 'membership:' . $params['campaign']->id . ':' . $params['request']->id;
+        $campaign = $params['campaign'];
+        $request = $params['request'];
 
-        if ($paymentMethod === 'credit_card') {
-            return $this->processCreditCardPayment((int) $params['pay']['total_amount'], $params['campaign'], $params['request'], $externalId);
-        } elseif ($paymentMethod === 'credit_card_x3') {
-            return $this->processCreditCardX3Payment($params['pay'], $params['campaign'], $params['request'], $externalId);
-        } elseif ($paymentMethod === 'bank_transfer') {
-            return $this->processBankTransferPayment((int) $params['pay']['total_amount'], $params['campaign'], $params['request'], $externalId);
-        } elseif ($paymentMethod === 'check') {
-            return $this->processCheckPayment((int) $params['pay']['total_amount'], $params['campaign'], $params['request'], $externalId);
-        } else {
+        $externalId = 'membership:' . $campaign->id . ':' . $request->id;
+
+        $paymentMethod = null;
+        if (isset($campaign->settings->payment_methods)) {
+            foreach ($campaign->settings->payment_methods as $method) {
+                if ($method->id === $paymentMethodId) {
+                    $paymentMethod = $method;
+                    break;
+                }
+            }
+        }
+
+        if ($paymentMethod === null) {
             throw new \InvalidArgumentException('Invalid payment method.');
+        }
+
+        switch ($paymentMethod->type) {
+            case 'credit_card':
+                return $this->processCreditCardPayment((int) $params['pay']['total_amount'], $campaign, $request, $externalId);
+            case 'credit_card_x':
+                return $this->processCreditCardXPayment($params['pay'], $paymentMethod->options, $campaign, $request, $externalId);
+            case 'bank_transfer':
+                return $this->processBankTransferPayment((int) $params['pay']['total_amount'], $campaign, $request, $externalId);
+            case 'check':
+                return $this->processCheckPayment((int) $params['pay']['total_amount'], $campaign, $request, $externalId);
+            default:
+                throw new \InvalidArgumentException('Invalid type of payment method.');
         }
     }
 
@@ -56,7 +74,7 @@ class PayUseCase implements UseCaseInterface
     }
 
     /**
-     * Process credit card x3 payment
+     * Process credit card x payment
      *
      * @param array $pay
      * @param \stdClass $campaign
@@ -64,10 +82,11 @@ class PayUseCase implements UseCaseInterface
      * @param string $externalId
      * @return array
      */
-    private function processCreditCardX3Payment(array $pay, \stdClass $campaign, \stdClass $request, string $externalId)
+    private function processCreditCardXPayment(array $pay, \stdClass $options, \stdClass $campaign, \stdClass $request, string $externalId)
     {
         $amount = (int) $pay['total_amount'];
-        $periods = 3;
+        $periods = $options->periods ?? [];
+        $nbPeriods = count($periods);
 
         $fees = 0;
         $amount = 0;
@@ -79,21 +98,23 @@ class PayUseCase implements UseCaseInterface
             }
         }
 
-        $baseAmount = floor($amount / $periods);
+        $baseAmount = floor($amount / $nbPeriods);
 
         $terms = [];
         $terms[] = [
             'amount' => $baseAmount + $fees,
-            'date' => strtotime('+0 month'),
+            'date' => time(),
         ];
         $amount -= $baseAmount;
 
-        for ($i = 1; $i < $periods; $i++) {
+        // Remove the first period as it has already been accounted for in the initial term
+        array_shift($periods);
+
+        foreach ($periods as $period) {
             $terms[] = [
                 'amount' => $baseAmount,
-                'date' => strtotime('+' . $i . ' month'),
+                'date' => strtotime($period),
             ];
-
             $amount -= $baseAmount;
         }
 

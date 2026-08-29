@@ -66,8 +66,6 @@ export const ToastProvider: React.FC< React.PropsWithChildren< {} > > = ( {
 			duration: duration ?? defaultOptions.duration,
 		};
 
-		console.log( 'Showing toast:', toast );
-
 		setToasts( ( prevToasts ) => [ ...prevToasts, toast ] );
 
 		window.setTimeout( () => {

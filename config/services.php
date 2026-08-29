@@ -321,5 +321,54 @@ return [
                 'value' => 'wolf-memberships.convert_request_to_subscriptions'
             ]
         ]
-    ]
+    ],
+    'wolf-memberships.use_case.update_campaign_settings' => [
+        'class' => \Wolf\Memberships\UseCase\UpdateCampaignSettingsUseCase::class,
+        'arguments' => [
+            '@wolf.entity.manager'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.update_campaign_settings'
+            ]
+        ]
+    ],
+    'wolf-memberships.use_case.resend_payment' => [
+        'class' => \Wolf\Memberships\UseCase\ResendPaymentUseCase::class,
+        'arguments' => [
+            '@wolf.entity.manager',
+            '@wolf.mail'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.resend_payment'
+            ]
+        ]
+    ],
+    'wolf-memberships.use_case.current_wheels' => [
+        'class' => \Wolf\Memberships\UseCase\CurrentWheelsUseCase::class,
+        'arguments' => [
+            '@wolf.db'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.current_wheels'
+            ]
+        ]
+    ],
+    'wolf-memberships.use_case.next_wheels' => [
+        'class' => \Wolf\Memberships\UseCase\NextWheelsUseCase::class,
+        'arguments' => [
+            '@wolf.db'
+        ],
+        'tags' => [
+            [
+                'name' => 'use_case',
+                'value' => 'wolf-memberships.next_wheels'
+            ]
+        ]
+    ],
 ];

@@ -9,6 +9,10 @@ class CalculateRegistrationTotalUseCase implements UseCaseInterface
 {
     private $campaignRepository;
 
+    private $unitPrice = 0;
+
+    private $licenses = [];
+
     public function __construct(EntityManager $entityManager)
     {
         $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
@@ -21,15 +25,28 @@ class CalculateRegistrationTotalUseCase implements UseCaseInterface
             throw new \InvalidArgumentException('Campaign ID is required.');
         }
 
-        $unitPrice = 13200;
+        $campaign = $this->campaignRepository->findById($campaignId);
 
+        if (!$campaign) {
+            throw new \InvalidArgumentException('Campaign not found.');
+        }
+
+        $this->licenses = $campaign->settings->licenses ?? [];
+        $this->unitPrice = (int) $campaign->settings->contribution_amount ?? 0;
+        
         $participants = $params['participants'] ?? [];
+        
+        if (count($participants) > 2) {
+            $this->unitPrice = $campaign->settings->contribution_family_amount ?? 0; // Apply the same unit price for more than 2 participants
+        }
+
+        $discountAmount = 0;
 
         $items = [];
 
         foreach ($participants as $index => $participant) {
 
-        $participant = is_array($participant) ? (object) $participant : $participant;
+            $participant = is_array($participant) ? (object) $participant : $participant;
 
             $birthdate = $participant->birthdate ?? '';
 
@@ -37,26 +54,29 @@ class CalculateRegistrationTotalUseCase implements UseCaseInterface
                 'type' => 'participant',
                 'participant_index' => $index,
                 'name' => 'Cotisation',
-                'amount' => (int) $unitPrice,
+                'amount' => $this->unitPrice,
                 'currency' => 'EUR',
             ];
 
-            $items[] = [
-                'type' => 'fee',
-                'participant_index' => $index,
-                'name' => 'Licence FFRS',
-                'amount' => (int) $this->calculateLicenceFee($birthdate),
-                'currency' => 'EUR',
-            ];
+            $license = $this->selectGoodLicense($birthdate);
+            if ($license) {
+                $items[] = [
+                    'type' => 'fee',
+                    'participant_index' => $index,
+                    'name' => $license->title,
+                    'amount' => $license->amount,
+                    'currency' => 'EUR',
+                ];
+            }
         }
 
-        if (count($participants) > 2) {
-            $discountAmount = 1000 * (count($participants) - 1);
+        if ($params['discount_amount'] > 0) {
+            $discountAmount = (int) $params['discount_amount'];
             $items[] = [
                 'type' => 'discount',
                 'participant_index' => null,
-                'name' => 'Remise Famille',
-                'amount' => -(int) $discountAmount,
+                'name' => 'Remise',
+                'amount' => -$discountAmount,
                 'currency' => 'EUR',
             ];
         }
@@ -68,30 +88,30 @@ class CalculateRegistrationTotalUseCase implements UseCaseInterface
         ];
     }
 
-    private function calculateLicenceFee(string $birthdate): int
+    private function selectGoodLicense(string $birthdate): \stdClass|null
     {
         if (empty($birthdate)) {
-            return 0;
+            return null;
         }
 
-        $licenses = [
-            ['age_min' => null, 'age_max' => 6, 'fee' => 1463],
-            ['age_min' => 6, 'age_max' => 13, 'fee' => 2478],
-            ['age_min' => 13, 'age_max' => null, 'fee' => 4678],
-        ];
+        if (empty($this->licenses)) {
+            return null;
+        }
+
+        $licenses = $this->licenses;
 
         $birthDateTime = new \DateTime($birthdate);
-        $currentDate = new \DateTime();
-        $age = $currentDate->diff($birthDateTime)->y;
+        $year = (int) $birthDateTime->format('Y');
 
         foreach ($licenses as $license) {
-            $ageMin = $license['age_min'];
-            $ageMax = $license['age_max'];
-            if (($ageMin === null || $age >= $ageMin) && ($ageMax === null || $age <= $ageMax)) {
-                return $license['fee'];
+            $yearMin = $license->year_min;
+            $yearMax = $license->year_max;
+
+            if (($yearMin === null || $year <= $yearMin) && ($yearMax === null || $year >= $yearMax)) {
+                return $license;
             }
         }
 
-        return 0;
+        return null;
     }
 }

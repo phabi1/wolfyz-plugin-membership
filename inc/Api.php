@@ -94,13 +94,13 @@ class Api implements ContainerAwareInterface
             'permission_callback' => '__return_true'
         ]);
         register_rest_route('wolf-memberships/v1', '/members/exists', [
-            'methods' => 'POST',
+            'methods' => 'GET',
             'callback' => [$controller, 'exists'],
             'permission_callback' => '__return_true'
         ]);
-        register_rest_route('wolf-memberships/v1', '/members/generate-hash', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'generateHash'],
+        register_rest_route('wolf-memberships/v1', '/members/hash', [
+            'methods' => 'POST',
+            'callback' => [$controller, 'hash'],
             'permission_callback' => '__return_true'
         ]);
     }
@@ -109,7 +109,7 @@ class Api implements ContainerAwareInterface
     {
         $controller = $this->getController('wolf-memberships.controller.request');
         $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests', $controller, [
-            'actions' => Routes::ROUTE_ITEMS | Routes::ROUTE_ITEM
+            'actions' => Routes::ROUTE_ITEMS | Routes::ROUTE_ITEM | Routes::ROUTE_UPDATE
         ]);
         register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/approve', [
             'methods' => 'POST',
@@ -135,6 +135,12 @@ class Api implements ContainerAwareInterface
         register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/history', [
             'methods' => 'GET',
             'callback' => [$controller, 'history'],
+            'permission_callback' => '__return_true'
+        ]);
+
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/resend-payment', [
+            'methods' => 'POST',
+            'callback' => [$controller, 'resendPayment'],
             'permission_callback' => '__return_true'
         ]);
     }
@@ -185,6 +191,24 @@ class Api implements ContainerAwareInterface
     {
         $controller = $this->getController('wolf-memberships.controller.campaign');
         $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns', $controller);
+
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/settings', [
+            'methods' => 'PUT',
+            'callback' => [$controller, 'updateCampaignSettings'],
+            'permission_callback' => '__return_true'
+        ]);
+
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/current-wheels', [
+            'methods' => 'GET',
+            'callback' => [$controller, 'currentWheels'],
+            'permission_callback' => '__return_true'
+        ]);
+
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/next-wheels', [
+            'methods' => 'GET',
+            'callback' => [$controller, 'nextWheels'],
+            'permission_callback' => '__return_true'
+        ]);
     }
 
     protected function registerPeriodRoutes()

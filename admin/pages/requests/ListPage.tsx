@@ -126,6 +126,8 @@ export default function RequestListPage() {
     RequestService.items(campaignId!, {
       page: state.pagination.page + 1,
       size: state.pagination.size,
+      sort: 'created_at',
+      order: 'desc',
       filters: { ...state.filters },
     }).then((data: { items: Request[]; total: number }) => {
       dispatch({ type: "fetchItems", payload: data });

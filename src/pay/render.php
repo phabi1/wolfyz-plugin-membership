@@ -38,24 +38,25 @@ $campaign = $campaignRepository->findById($request->campaign_id);
 
 $useCaseBus = \Wolf\Core\Plugin::getContainer()->get('wolf.use_case_bus');
 
-$paymentMethods = [
-	['name' => 'Credit Card', 'value' => 'credit_card'],
-	['name' => 'Credit Card x3', 'value' => 'credit_card_x3'],
-	['name' => 'Bank Transfer', 'value' => 'bank_transfer'],
-	['name' => 'Check', 'value' => 'check'],
-];
+$paymentMethods = array_reduce($campaign->settings->payment_methods ?? [], function ($carry, $item) {
+	if (isset($item->id)) {
+		$carry[$item->id] = $item;
+	}
+	return $carry;
+}, []);
 
 if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 
-	$paymentMethod = sanitize_text_field($_GET['payment_method']);
+	$paymentMethodId = sanitize_text_field($_GET['payment_method']);
 
 	$pay = $useCaseBus->execute('wolf-memberships.calculate_registration_total', [
 		'campaign_id' => $campaign->id,
 		'participants' => $request->data->participants ?? [],
+		'discount_amount' => $request->discount_amount ?? 0,
 	]);
 
 
-	if (!in_array($paymentMethod, array_column($paymentMethods, 'value'))) {
+	if (!isset($paymentMethods[$paymentMethodId])) {
 		echo '<p>' . esc_html__('Invalid payment method.', 'wolf-membership') . '</p>';
 		return;
 	}
@@ -63,7 +64,7 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 	$res = $useCaseBus->execute('wolf-memberships.pay', [
 		'campaign' => $campaign,
 		'request' => $request,
-		'payment_method' => $paymentMethod,
+		'payment_method' => $paymentMethodId,
 		'pay' => $pay,
 	]);
 
@@ -77,8 +78,6 @@ if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
 }
 
 
-
-
 $pageUrl = get_permalink(get_option('wolf_membership_pay_page', 0));
 
 ?>
@@ -90,14 +89,17 @@ $pageUrl = get_permalink(get_option('wolf_membership_pay_page', 0));
 	</p>
 	<?php
 	foreach ($paymentMethods as $method) {
+		if (!isset($method->id)) {
+			continue;
+		}
 		?>
 		<div>
 			<a href="<?php echo esc_url(add_query_arg([
 				'request_id' => $requestId,
 				'token' => $token,
-				'payment_method' => $method['value'],
+				'payment_method' => $method->id,
 			], $pageUrl)); ?>">
-				<?php echo esc_html($method['name']); ?>
+				<?php echo esc_html($method->title); ?>
 			</a>
 		</div>
 		<?php

@@ -1,4 +1,3 @@
-import { createRoot } from "react-dom/client";
 import { useEffect, useMemo, useState } from "react";
 import { __ } from "@wordpress/i18n";
 import Box from "@mui/material/Box";
@@ -11,12 +10,13 @@ import Typography from "@mui/material/Typography";
 import { ParticipantsStep } from "./steps/ParticipantsStep";
 import { ContactStep } from "./steps/ContactStep";
 import { ReviewStep } from "./steps/ReviewStep";
-import { isParticipantMinor, isValidParticipant } from "./helpers";
+import { isValidParticipant } from "./helpers";
 import { TEXT_DOMAIN } from "./utils";
 import { emptyParticipant, Participant } from "./models/participant";
 import { emptyTutor } from "./models/tutor";
 import { emptyAddress } from "./models/address";
 import { Contact, emptyContact } from "./models/contact";
+import RegistrationService from "./services/registration";
 
 export default function App({ campaignId, requestId, token }: { campaignId: string; requestId?: string; token?: string }) {
     const [loading, setLoading] = useState(true);
@@ -24,28 +24,16 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [step, setStep] = useState(0);
-    const [registration, setRegistration] = useState({ lessons: [] });
+    const [registration, setRegistration] = useState({ lessons: [], discount: 0 });
     const [participants, setParticipants] = useState<Participant[]>([emptyParticipant()]);
     const [selectedParticipantIndex, setSelectedParticipantIndex] = useState(0);
     const [totalToPay, setTotalToPay] = useState(0);
     const [contact, setContact] = useState<Contact>(emptyContact());
 
     useEffect(() => {
-
-        let url = `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration`;
-        if (requestId && token) {
-            url += `?request_id=${requestId}&token=${token}`;
-        }
-
-        fetch(url)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("An error occurred while loading the registration.");
-                }
-                return response.json();
-            })
+        RegistrationService.getRegistration(campaignId, requestId, token)
             .then((data) => {
-                setRegistration({ lessons: data.lessons || [] });
+                setRegistration({ lessons: data.lessons || [], discount: data.discount || 0 });
                 if (data.request) {
                     setContact({
                         ...data.request.contact,
@@ -63,63 +51,31 @@ export default function App({ campaignId, requestId, token }: { campaignId: stri
     const lessons = useMemo(() => registration.lessons || [], [registration]);
 
     const fetchTotalFromBackend = async () => {
-        try {
-            const response = await fetch(
-                `/wp-json/wolf-memberships/v1/campaigns/${campaignId}/registration/calculate-total`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        participants: participants.map((participant) => ({
-                            firstname: participant.firstname,
-                            lastname: participant.lastname,
-                            birthdate: participant.birthdate,
-                            gender: participant.gender,
-                            nationality: participant.nationality,
-                            address: participant.address || emptyAddress(),
-                            tutor1: participant.tutor1 || emptyTutor(),
-                            tutor2: participant.tutor2 || emptyTutor(),
-                            lesson_id: participant.lesson_id
-                                ? Number(participant.lesson_id)
-                                : "",
-                            license_type: participant.license_type || "hobby",
-                            comment: participant.comment || "",
-                            health_questionnaire: participant.health_questionnaire
-                                ? participant.health_questionnaire
-                                : null,
-                            identity_photo: participant.identity_photo
-                                ? participant.identity_photo
-                                : null,
-                            medical_certificate: participant.medical_certificate
-                                ? participant.medical_certificate
-                                : null,
-                            agree_photo: participant.agree_photo || false,
-                            agree_exit: participant.agree_exit || false,
-                        })),
-                    }),
-                },
-            );
-
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                throw new Error(
-                    data.message ||
-                    __("The amount could not be calculated.", TEXT_DOMAIN),
-                );
-            }
-
-            const data = await response.json().catch(() => ({}));
-            setTotalToPay(Number(data.total_amount ?? 0));
-            return Number(data.total_amount ?? 0);
-        } catch (err: any) {
-            setError(
-                err.message ||
-                __("An error occurred while calculating the amount.", TEXT_DOMAIN),
-            );
-            return 0;
-        }
+        RegistrationService.calculateTotal(campaignId, {
+            participants: participants.map((participant) => ({
+                firstname: participant.firstname,
+                lastname: participant.lastname,
+                birthdate: participant.birthdate,
+                gender: participant.gender,
+                nationality: participant.nationality,
+                address: participant.address || emptyAddress(),
+                tutor1: participant.tutor1 || emptyTutor(),
+                tutor2: participant.tutor2 || emptyTutor(),
+                lesson_id: participant.lesson_id
+                    ? Number(participant.lesson_id)
+                    : "",
+                license_type: participant.license_type || "hobby",
+                comment: participant.comment || "",
+                health_questionnaire: participant.health_questionnaire
+                    ? participant.health_questionnaire
+                    : null,
+            })),
+            discount: registration.discount || 0,
+        }).then((data) => {
+            setTotalToPay(data.total || 0);
+        }).catch((err) => {
+            setError(err.message || __("An error occurred.", TEXT_DOMAIN));
+        });
     };
 
     useEffect(() => {

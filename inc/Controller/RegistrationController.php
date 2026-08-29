@@ -29,16 +29,17 @@ class RegistrationController extends AbstractController
 
         $participants = $payload['participants'] ?? [];
         $campaignId = $request->get_param('campaign_id');
+        $discount = $payload['discount'] ?? 0;
 
         $total = $useCaseBus->execute('wolf-memberships.calculate_registration_total', [
             'campaign_id' => $campaignId,
             'participants' => $participants,
+            'discount_amount' => $discount,
         ]);
 
         return [
             'success' => true,
             'total_amount' => $total['total_amount'] ?? 0,
-            'participants_count' => $total['participants_count'] ?? 0,
             'currency' => $total['currency'] ?? 'EUR',
             'pricing_breakdown' => $total['items'] ?? [],
         ];

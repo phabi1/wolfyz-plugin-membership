@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardHeader } from "@wordpress/components";
+import { Button, Card, CardBody, CardHeader, Modal, SelectControl } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { useMemo, useState, type ReactNode } from "react";
 import type { RequestParticipant } from "../../models/request-participant";
@@ -8,10 +8,84 @@ import { Address } from "../ui/Address";
 import { isParticipantMinor } from "../../helpers";
 import { Lesson } from '../ui/Lesson';
 
-export function ParticipantInfo({ participant, lessons, title, lessonStatus, hideLessonStatus }: { participant: RequestParticipant, lessons: LessonModel[], title?: string, lessonStatus: string, hideLessonStatus?: boolean }) {
+const badgeStyle = (status: string) => {
+    let style: React.CSSProperties = {};
+    switch (status) {
+        case "ok":
+            style = {
+                background: "#dff6dd",
+                color: "#14532d",
+                border: "1px solid #86efac",
+            };
+            break;
+        case "warning":
+            style = {
+                background: "#fff4e5",
+                color: "#7a4b00",
+                border: "1px solid #fed7aa",
+            };
+            break;
+        case "error":
+            style = {
+                background: "#fef2f2",
+                color: "#991b1b",
+                border: "1px solid #fca5a5",
+            };
+            break;
+        default:
+            style = {
+                background: "#f3f4f6",
+                color: "#374151",
+                border: "1px solid #d1d5db",
+            };
+            break;
+    }
+
+    return {
+        display: "inline-block",
+        padding: "4px 8px",
+        borderRadius: 12,
+        fontSize: 12,
+        lineHeight: "16px",
+        fontWeight: 600,
+        ...style,
+    };
+};
+
+export function ParticipantInfo({ participant, lessons, title, lessonStatus, hideLessonStatus, onIdentityChanged }: { participant: RequestParticipant & { member_status: string, member_suggestions: any[] }, lessons: LessonModel[], title?: string, lessonStatus: string, hideLessonStatus?: boolean, onIdentityChanged?: (identity: { firstname: string; lastname: string; birthdate: string }) => boolean | Promise<boolean> }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isEditIdentityModalOpen, setIsEditIdentityModalOpen] = useState(false);
+    const [selectedSuggestionId, setSelectedSuggestionId] = useState<string>("0");
+    const [isApplyingIdentity, setIsApplyingIdentity] = useState(false);
     const normalize = (value?: string | null) => value?.trim() || "N/A";
     const isProvided = (value?: string | null) => Boolean(value?.trim());
+
+    const parseBirthdate = (value: unknown): string => {
+        if (!value) {
+            return "";
+        }
+        if (value instanceof Date && !Number.isNaN(value.getTime())) {
+            return value.toISOString().slice(0, 10);
+        }
+        if (typeof value === "number") {
+            const normalizedValue = value < 1000000000000 ? value * 1000 : value;
+            const date = new Date(normalizedValue);
+            if (!Number.isNaN(date.getTime())) {
+                return date.toISOString().slice(0, 10);
+            }
+        }
+        if (typeof value === "string") {
+            const trimmed = value.trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+                return trimmed.slice(0, 10);
+            }
+            const parsed = new Date(trimmed);
+            if (!Number.isNaN(parsed.getTime())) {
+                return parsed.toISOString().slice(0, 10);
+            }
+        }
+        return "";
+    };
 
     const firstname = normalize(participant.firstname);
     const lastname = normalize(participant.lastname);
@@ -59,48 +133,34 @@ export function ParticipantInfo({ participant, lessons, title, lessonStatus, hid
     const agreePhoto = participant.agree_photo === true ? __("Yes", "wolf-membership") : __("No", "wolf-membership");
     const agreeExit = participant.agree_exit === true ? __("Yes", "wolf-membership") : __("No", "wolf-membership");
 
-    const badgeStyle = (status: string) => {
-        let style: React.CSSProperties = {};
-        switch (status) {
-            case "ok":
-                style = {
-                    background: "#dff6dd",
-                    color: "#14532d",
-                    border: "1px solid #86efac",
-                };
-                break;
-            case "warning":
-                style = {
-                    background: "#fff4e5",
-                    color: "#7a4b00",
-                    border: "1px solid #fed7aa",
-                };
-                break;
-            case "error":
-                style = {
-                    background: "#fef2f2",
-                    color: "#991b1b",
-                    border: "1px solid #fca5a5",
-                };
-                break;
-            default:
-                style = {
-                    background: "#f3f4f6",
-                    color: "#374151",
-                    border: "1px solid #d1d5db",
-                };
-                break;
+    const isAnonymous = useMemo(() => {
+        if (participant.member_status === "loading") {
+            return false;
         }
+        return participant.member_status === "anonymous";
+    }, [participant.member_status]);
 
-        return {
-            display: "inline-block",
-            padding: "4px 8px",
-            borderRadius: 12,
-            fontSize: 12,
-            lineHeight: "16px",
-            fontWeight: 600,
-            ...style,
-        };
+    const isSuggested = participant.member_status === "suggested";
+    const suggestions = useMemo(() => {
+        return (participant.member_suggestions || []).map((suggestion: any, index: number) => ({
+            id: index,
+            firstname: suggestion.firstname || "",
+            lastname: suggestion.lastname || "",
+            birthdate: parseBirthdate(suggestion.birthdate),
+        }));
+    }, [participant.member_suggestions]);
+
+    const selectedSuggestion = useMemo(() => {
+        const suggestionIndex = Number(selectedSuggestionId);
+        if (Number.isNaN(suggestionIndex)) {
+            return null;
+        }
+        return suggestions[suggestionIndex] || null;
+    }, [selectedSuggestionId, suggestions]);
+
+    const openEditIdentityModal = () => {
+        setSelectedSuggestionId("0");
+        setIsEditIdentityModalOpen(true);
     };
 
     const sectionTitleStyle = {
@@ -133,6 +193,7 @@ export function ParticipantInfo({ participant, lessons, title, lessonStatus, hid
                         <strong>{firstname} {lastname}</strong>
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
+                        {!isAnonymous && <div>{participant.member_status}</div>}
                         {hideLessonStatus ? null : (<div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                             <span style={badgeStyle(lessonStatus)}>
                                 {hasLesson ? __("Lesson selected", "wolf-membership") : __("Lesson not selected", "wolf-membership")}
@@ -161,6 +222,11 @@ export function ParticipantInfo({ participant, lessons, title, lessonStatus, hid
                             <DetailItem label={__("Gender", "wolf-membership")} value={gender} />
                             <DetailItem label={__("Nationality", "wolf-membership")} value={nationality} />
                         </div>
+                        {isSuggested && suggestions.length > 0 && (
+                            <Button variant="secondary" onClick={openEditIdentityModal}>
+                                {__("Edit identity", "wolf-membership")}
+                            </Button>
+                        )}
                     </section>
 
                     <section>
@@ -241,6 +307,74 @@ export function ParticipantInfo({ participant, lessons, title, lessonStatus, hid
 
                 </div>
             </CardBody>}
+            {isEditIdentityModalOpen && (
+                <Modal
+                    title={__("Edit participant identity", "wolf-membership")}
+                    onRequestClose={() => {
+                        if (!isApplyingIdentity) {
+                            setIsEditIdentityModalOpen(false);
+                        }
+                    }}
+                >
+                    {suggestions.length > 0 ? (
+                        <div style={{ display: "grid", gap: 12 }}>
+                            <p style={{ margin: 0 }}>
+                                {__("Select a suggested member identity to apply to this participant.", "wolf-membership")}
+                            </p>
+                            <SelectControl
+                                label={__("Suggestions", "wolf-membership")}
+                                value={selectedSuggestionId}
+                                options={suggestions.map((suggestion, index) => ({
+                                    label: `${suggestion.firstname} ${suggestion.lastname}${suggestion.birthdate ? ` (${suggestion.birthdate})` : ""}`,
+                                    value: String(index),
+                                }))}
+                                onChange={(value) => setSelectedSuggestionId(value)}
+                            />
+                            {selectedSuggestion && (
+                                <div style={{ fontSize: 13, color: "#50575e" }}>
+                                    <div>{`${__("First Name", "wolf-membership")}: ${selectedSuggestion.firstname || "N/A"}`}</div>
+                                    <div>{`${__("Last Name", "wolf-membership")}: ${selectedSuggestion.lastname || "N/A"}`}</div>
+                                    <div>{`${__("Birthdate", "wolf-membership")}: ${selectedSuggestion.birthdate || "N/A"}`}</div>
+                                </div>
+                            )}
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                                <Button variant="tertiary" disabled={isApplyingIdentity} onClick={() => setIsEditIdentityModalOpen(false)}>
+                                    {__("Cancel", "wolf-membership")}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    disabled={!selectedSuggestion || isApplyingIdentity}
+                                    onClick={async () => {
+                                        if (!selectedSuggestion) {
+                                            return;
+                                        }
+                                        if (!onIdentityChanged) {
+                                            setIsEditIdentityModalOpen(false);
+                                            return;
+                                        }
+
+                                        setIsApplyingIdentity(true);
+                                        const saved = await onIdentityChanged({
+                                            firstname: selectedSuggestion.firstname,
+                                            lastname: selectedSuggestion.lastname,
+                                            birthdate: selectedSuggestion.birthdate,
+                                        });
+                                        setIsApplyingIdentity(false);
+
+                                        if (saved) {
+                                            setIsEditIdentityModalOpen(false);
+                                        }
+                                    }}
+                                >
+                                    {isApplyingIdentity ? __("Saving...", "wolf-membership") : __("Apply", "wolf-membership")}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p>{__("No suggestions available.", "wolf-membership")}</p>
+                    )}
+                </Modal>
+            )}
         </Card>
     );
 }

@@ -68,6 +68,7 @@ class GetRegistrationUseCase implements UseCaseInterface
             }
 
             $response['request'] = $request->data;
+            $response['discount'] = $request->discount_amount ?? 0;
         }
 
         return $response;

@@ -5,6 +5,7 @@ use Wolf\Core\Entity\Definition\Relation;
 
 return [
     'wolf-memberships.campaign' => [
+        'repository' => Wolf\Memberships\Entity\Repository\CampaignEntityRepository::class,
         'table' => 'wolf_memberships_campaign',
         'fields' => [
             'id' => ['type' => Field::TYPE_INTEGER],
@@ -15,6 +16,7 @@ return [
             'registration_start' => ['type' => Field::TYPE_DATE],
             'registration_end' => ['type' => Field::TYPE_DATE],
             'participant_fields' => ['type' => Field::TYPE_JSON, 'nullable' => true],
+            'settings' => ['type' => Field::TYPE_JSON, 'readonly' => true]
         ],
         'relations' => []
     ],
@@ -64,8 +66,8 @@ return [
         ]
     ],
     'wolf-memberships.member' => [
-        'table' => 'wolf_memberships_member',
         'repository' => Wolf\Memberships\Entity\Repository\MemberEntityRepository::class,
+        'table' => 'wolf_memberships_member',
         'fields' => [
             'id' => ['type' => Field::TYPE_INTEGER],
             'firstname' => ['type' => Field::TYPE_STRING, 'required' => true],
@@ -74,7 +76,7 @@ return [
             'license_number' => ['type' => Field::TYPE_STRING],
             'gender' => ['type' => Field::TYPE_STRING, 'nullable' => true],
             'avatar_url' => ['type' => Field::TYPE_STRING, 'nullable' => true],
-            'hash' => ['type' => Field::TYPE_STRING]
+            'hash' => ['type' => Field::TYPE_STRING, 'readonly' => true, 'hidden' => true]
         ],
         'relations' => [
             'subscriptions' => [
@@ -103,6 +105,7 @@ return [
             'email' => ['type' => Field::TYPE_STRING, 'required' => true],
             'phone' => ['type' => Field::TYPE_STRING, 'nullable' => true],
             'data' => ['type' => Field::TYPE_JSON, 'nullable' => true],
+            'discount_amount' => ['type' => Field::TYPE_INTEGER],
             'token' => ['type' => Field::TYPE_STRING, 'required' => true, 'exclude' => true],
             'campaign_id' => ['type' => Field::TYPE_INTEGER, 'required' => true],
         ],
@@ -241,8 +244,6 @@ return [
             'color' => ['type' => Field::TYPE_STRING, 'required' => true],
             'parent_id' => ['type' => Field::TYPE_INTEGER, 'nullable' => true],
             'parent_path' => ['type' => Field::TYPE_STRING, 'nullable' => true, 'readonly' => true, 'hidden' => true],
-            'created_at' => ['type' => Field::TYPE_DATE, 'required' => true],
-            'updated_at' => ['type' => Field::TYPE_DATE, 'required' => true]
         ]
     ],
     'wolf-memberships.member_wheel_assignment' => [

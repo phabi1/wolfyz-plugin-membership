@@ -16,5 +16,6 @@ export type Request = {
     };
     participants: RequestParticipant[];
   };
+  discount_amount: number;
   campaign_id: number;
 };
