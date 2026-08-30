@@ -194,7 +194,7 @@ export default function CampaignSettingsPage() {
     }
 
     return (
-        <Form form={form} onSubmit={handleSave}>
+        <Form form={form} onSubmit={handleSubmit(handleSave)}>
             <Page title={__("Campaign Settings", "wolf-membership")} headerRight={
                 <Button
                     variant="primary"
@@ -283,10 +283,10 @@ export default function CampaignSettingsPage() {
                                     <Card>
                                         <CardBody>
                                             <SettingsPaymentMethodsForm
-                                                paymentMethodFields={paymentMethodFields}
-                                                appendPaymentMethod={appendPaymentMethod}
-                                                updatePaymentMethod={updatePaymentMethod}
-                                                removePaymentMethod={removePaymentMethod}
+                                                items={paymentMethodFields}
+                                                onAdd={appendPaymentMethod}
+                                                onUpdate={updatePaymentMethod}
+                                                onRemove={removePaymentMethod}
                                             />
                                         </CardBody>
                                     </Card>

@@ -59,7 +59,6 @@ latest_per_branch AS(
 SELECT
     w.id AS wheel_id,
     w.title AS wheel_title,
-    COUNT(*) AS count
 FROM
     latest_per_branch AS l
 JOIN wp_wolf_memberships_wheel AS w
