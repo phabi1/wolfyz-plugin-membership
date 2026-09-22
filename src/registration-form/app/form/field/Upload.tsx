@@ -5,8 +5,9 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { __ } from "@wordpress/i18n";
 
-export function UploadField({ file, onChange }: {
+export function UploadField({ file, url, onChange }: {
     file: string | null,
+    url: string,
     onChange: (file: string | null) => void
 }) {
 
@@ -17,27 +18,45 @@ export function UploadField({ file, onChange }: {
         return file.split('/').pop() || file;
     }, [file]);
 
-    const previewUrl = useMemo(() => {
-        if (!file) {
-            return '#';
-        }
-        return file.startsWith("http") ? file : `/wp-content/uploads/${file}`;
-    }, [file]);
 
     const [uploading, setUploading] = useState(false);
     const [removing, setRemoving] = useState(false);
+    const [previewing, setPreviewing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const handlePreviewFile = () => {
+        if (!file) {
+            return;
+        }
+        setPreviewing(true);
+        fetch(url + '?file=' + encodeURIComponent(file), {
+            method: 'GET',
+        }).then((response) => response.json())
+            .then((data) => {
+                if (data.success && data.url) {
+                    window.open(data.url, "_blank", "noopener,noreferrer");
+                }
+            }).finally(() => {
+                setPreviewing(false);
+            });
+    };
 
     const handleRemoveFile = () => {
         setRemoving(true);
-        fetch("/wp-json/wolf-memberships/v1/file/upload", {
+        fetch(url, {
             method: "DELETE",
-            body: JSON.stringify({ uri: file }),
+            body: JSON.stringify({ file }),
             headers: {
                 "Content-Type": "application/json",
             },
         })
             .then((response) => response.json())
+            .then((data) => {
+                return fetch(data.url, {
+                    method: "DELETE",
+                    body: JSON.stringify({ file }),
+                }).then((response) => response.json());
+            })
             .then((data) => {
                 if (!data.success) {
                     console.error("File removal failed:", data.error);
@@ -54,14 +73,36 @@ export function UploadField({ file, onChange }: {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 
-        const data = new FormData();
-        data.append("file", event.target.files ? event.target.files[0] : new Blob());
         // Upload file
         setUploading(true);
-        fetch("/wp-json/wolf-memberships/v1/file/upload", {
+
+        const file = event.target.files ? event.target.files[0] : null;
+
+        if (!file) {
+            setUploading(false);
+            return;
+        }
+
+        fetch(url, {
             method: "POST",
-            body: data,
+            body: JSON.stringify({
+                file: file.name,
+                mime_type: file.type
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
         }).then((response) => response.json())
+            .then((data) => {
+                // Upload the file to the presigned URL provided by the server into binary format
+                return fetch(data.url, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": file.type,
+                    },
+                    body: file,
+                }).then((response) => response.json())
+            })
             .then((data) => {
                 setUploading(false);
                 onChange(data.uri);
@@ -110,8 +151,9 @@ export function UploadField({ file, onChange }: {
             {file ? (
                 <Box>
                     <Typography variant="body2">
-                        {__("Selected file:", TEXT_DOMAIN)} <a href={previewUrl} target="_blank" rel="noopener noreferrer">{filename}</a>
+                        {filename}
                     </Typography>
+                    <Button variant="outlined" color="primary" disabled={!file || previewing} onClick={handlePreviewFile}>{__("Preview", TEXT_DOMAIN)}</Button>
                     <Button variant="outlined" color="secondary" onClick={handleRemoveFile}>
                         {__("Remove", TEXT_DOMAIN)}
                     </Button>

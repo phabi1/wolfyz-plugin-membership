@@ -92,4 +92,76 @@ class RegistrationController extends AbstractController
             'success' => true,
         ];
     }
+
+    public function uploadFileAction(WP_REST_Request $request)
+    {
+        $payload = $request->get_json_params() ?: [];
+        $file = $request->get_json_params()['file'] ?? null;
+        $mimeType = $payload['mime_type'] ?? null;
+
+        if (!$file) {
+            return [
+                'success' => false,
+                'message' => 'No file provided.'
+            ];
+        }
+
+        $api = $this->getService('wolf-api.client');
+        $response = $api->post('/membership/file/upload', [
+            'body' => json_encode(['file' => $file, 'mime_type' => $mimeType]),
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+        $json = json_decode($response->getBody()->getContents(), true);
+
+        return $json;
+    }
+
+    public function removeFileAction(WP_REST_Request $request)
+    {
+        $payload = $request->get_json_params() ?: [];
+        $file = $request->get_json_params()['file'] ?? null;
+
+        if (!$file) {
+            return [
+                'success' => false,
+                'message' => 'No file provided.'
+            ];
+        }
+
+        $api = $this->getService('wolf-api.client');
+        $response = $api->post('/membership/file/remove', [
+            'body' => json_encode(['file' => $file]),
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+        $json = json_decode($response->getBody()->getContents(), true);
+
+        return $json;
+    }
+
+    public function previewFileAction(WP_REST_Request $request)
+    {
+        $file = $request->get_query_params()['file'] ?? null;
+
+        if (!$file) {
+            return [
+                'success' => false,
+                'message' => 'No file provided.'
+            ];
+        }
+
+        $api = $this->getService('wolf-api.client');
+        $response = $api->post('/membership/file/download', [
+            'body' => json_encode(['file' => $file]),
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+        $json = json_decode($response->getBody()->getContents(), true);
+
+        return $json;
+    }
 }

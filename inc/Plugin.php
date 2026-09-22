@@ -19,13 +19,11 @@ class Plugin
 
     public function setup()
     {
-        Migrator::upgrade('wolf-membership', WOLF_MEMBERSHIP_PLUGIN_DIR, __NAMESPACE__, WOLF_MEMBERSHIP_PLUGIN_VERSION);
     }
 
     public function init()
     {
-        $admin = new Admin();
-        $admin->setup();
+        Migrator::upgrade('wolf-membership', WOLF_MEMBERSHIP_PLUGIN_DIR, __NAMESPACE__, WOLF_MEMBERSHIP_PLUGIN_VERSION);
 
         $api = new Api();
         $api->setup();

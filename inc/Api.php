@@ -20,19 +20,6 @@ class Api implements ContainerAwareInterface
     public function setup()
     {
         add_action('rest_api_init', function () {
-            $this->restRoutesHelper = $this->getContainer()->get('wolf.rest.routes');
-            $this->registerFilesRoute();
-            $this->registerDashboardRoutes();
-            $this->registerCampaignRoutes();
-            $this->registerSubscriptionRoutes();
-            $this->registerMemberRoutes();
-            $this->registerContactRoutes();
-            $this->registerPeriodRoutes();
-            $this->registerLessonRoutes();
-            $this->registerSessionRoutes();
-            $this->registerWheelRoutes();
-            $this->registerWheelAssignmentRoutes();
-            $this->registerRequestRoutes();
             $this->registerRegistrationRoutes();
         });
     }
@@ -48,101 +35,6 @@ class Api implements ContainerAwareInterface
     protected function getController($controllerName)
     {
         return $this->getContainer()->get($controllerName);
-    }
-
-    protected function registerFilesRoute()
-    {
-        $controller = $this->getController('wolf-memberships.controller.file');
-        register_rest_route('wolf-memberships/v1', '/file/upload', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'upload'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', '/file/upload', [
-            'methods' => 'DELETE',
-            'callback' => [$controller, 'remove'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', '/file/download', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'download'],
-            'permission_callback' => '__return_true'
-        ]);
-
-
-    }
-
-    protected function registerDashboardRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.dashboard');
-        register_rest_route('wolf-memberships/v1', '/dashboard/source', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'source'],
-            'permission_callback' => '__return_true'
-        ]);
-    }
-
-    protected function registerMemberRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.member');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'members', $controller);
-        register_rest_route('wolf-memberships/v1', '/members/import', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'import'],
-            'permission_callback' => '__return_true'
-        ]);
-        register_rest_route('wolf-memberships/v1', '/members/exists', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'exists'],
-            'permission_callback' => '__return_true'
-        ]);
-        register_rest_route('wolf-memberships/v1', '/members/hash', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'hash'],
-            'permission_callback' => '__return_true'
-        ]);
-    }
-
-    protected function registerRequestRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.request');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests', $controller, [
-            'actions' => Routes::ROUTE_ITEMS | Routes::ROUTE_ITEM | Routes::ROUTE_UPDATE
-        ]);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/approve', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'approve'],
-            'permission_callback' => '__return_true'
-        ]);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/reject', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'reject'],
-            'permission_callback' => '__return_true'
-        ]);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/paid', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'paid'],
-            'permission_callback' => '__return_true'
-        ]);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/cancel', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'cancel'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/history', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'history'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/requests/(?P<request_id>[\d]+)/resend-payment', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'resendPayment'],
-            'permission_callback' => '__return_true'
-        ]);
     }
 
     protected function registerRegistrationRoutes()
@@ -163,87 +55,21 @@ class Api implements ContainerAwareInterface
             'callback' => [$controller, 'registerAction'],
             'permission_callback' => '__return_true'
         ]);
-    }
-
-    protected function registerContactRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.contact');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'members/(?P<member_id>[\d]+)/contacts', $controller);
-    }
-
-    protected function registerSubscriptionRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.subscription');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/subscriptions', $controller);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/subscriptions/import', [
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/upload-file', [
             'methods' => 'POST',
-            'callback' => [$controller, 'import'],
+            'callback' => [$controller, 'uploadFileAction'],
             'permission_callback' => '__return_true'
         ]);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/subscriptions/export', [
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/upload-file', [
+            'methods' => 'DELETE',
+            'callback' => [$controller, 'removeFileAction'],
+            'permission_callback' => '__return_true'
+        ]);
+        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/upload-file', [
             'methods' => 'GET',
-            'callback' => [$controller, 'export'],
+            'callback' => [$controller, 'previewFileAction'],
             'permission_callback' => '__return_true'
         ]);
+        
     }
-
-    protected function registerCampaignRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.campaign');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns', $controller);
-
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/settings', [
-            'methods' => 'PUT',
-            'callback' => [$controller, 'updateCampaignSettings'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/current-wheels', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'currentWheels'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/next-wheels', [
-            'methods' => 'GET',
-            'callback' => [$controller, 'nextWheels'],
-            'permission_callback' => '__return_true'
-        ]);
-    }
-
-    protected function registerPeriodRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.period');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/periods', $controller);
-        register_rest_route('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/periods/(?P<id>[\d]+)/print', [
-            'methods' => 'POST',
-            'callback' => [$controller, 'print'],
-            'permission_callback' => '__return_true'
-        ]);
-    }
-
-    protected function registerLessonRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.lesson');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/lessons', $controller);
-    }
-
-    protected function registerSessionRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.session');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'campaigns/(?P<campaign_id>[\d]+)/sessions', $controller);
-    }
-
-    protected function registerWheelRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.wheel');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'wheels', $controller);
-    }
-
-    protected function registerWheelAssignmentRoutes()
-    {
-        $controller = $this->getController('wolf-memberships.controller.wheel_assignment');
-        $this->restRoutesHelper->createRoutes('wolf-memberships/v1', 'members/(?P<member_id>[\d]+)/wheels', $controller);
-    }
-
 }

@@ -40,6 +40,7 @@ export function ParticipantsStep({
   onNext: () => void;
   canNext: boolean;
 }) {
+  const presignUrl = '/wp-json/wolf-memberships/v1/campaigns/2/upload-file';
   const selectedParticipant =
     participants[selectedParticipantIndex] || participants[0];
 
@@ -337,6 +338,7 @@ export function ParticipantsStep({
                 </Typography>
                 <UploadField
                   file={selectedParticipant.health_questionnaire}
+                  url={presignUrl}
                   onChange={(file) =>
                     onChangeParticipant(
                       selectedParticipantIndex,
@@ -367,6 +369,7 @@ export function ParticipantsStep({
                   </Typography>
                   <UploadField
                     file={selectedParticipant.identity_photo}
+                    url={presignUrl}
                     onChange={(file) =>
                       onChangeParticipant(
                         selectedParticipantIndex,
@@ -387,6 +390,7 @@ export function ParticipantsStep({
                   </Typography>
                   <UploadField
                     file={selectedParticipant.medical_certificate}
+                    url={presignUrl}
                     onChange={(file) =>
                       onChangeParticipant(
                         selectedParticipantIndex,

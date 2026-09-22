@@ -1,1 +1,0 @@
-<?php echo __('Your request has been rejected', 'wolf-membership'); ?>

@@ -2,6 +2,7 @@
 
 namespace Wolf\Memberships\UseCase;
 
+use GuzzleHttp\Client;
 use Wolf\Core\Entity\EntityRepositoryInterface;
 use Wolf\Core\UseCase\UseCaseInterface;
 use Wolf\Core\Entity\EntityManager;
@@ -9,20 +10,11 @@ use Wolf\Core\Mail\MailService;
 
 class UpdateRequestUseCase implements UseCaseInterface
 {
-    private EntityRepositoryInterface $campaignRepository;
+    private Client $client;
 
-    private EntityRepositoryInterface $requestRepository;
-
-    private EntityRepositoryInterface $requestLogRepository;
-
-    private MailService $mailService;
-
-    public function __construct(EntityManager $entityManager, MailService $mailService)
+    public function __construct(Client $client)
     {
-        $this->campaignRepository = $entityManager->getRepository('wolf-memberships.campaign');
-        $this->requestRepository = $entityManager->getRepository('wolf-memberships.request');
-        $this->requestLogRepository = $entityManager->getRepository('wolf-memberships.request_log');
-        $this->mailService = $mailService;
+        $this->client = $client;
     }
 
     public function execute(array $params = []): array
@@ -32,62 +24,32 @@ class UpdateRequestUseCase implements UseCaseInterface
             throw new \InvalidArgumentException('Campaign ID is required.');
         }
 
-        $campaign = $this->campaignRepository->findById($campaignId);
-        if (!$campaign) {
-            throw new \Exception('Campaign not found.');
+        $requestId = $params['request_id'] ?? null;
+        if (!$requestId) {
+            throw new \InvalidArgumentException('Request ID is required.');
         }
 
-        if ($campaign->registration_start && $campaign->registration_end) {
-            $now = new \DateTime();
-            $start = new \DateTime($campaign->registration_start);
-            $end = new \DateTime($campaign->registration_end);
-
-            if ($now < $start || $now > $end) {
-                throw new \Exception('Registration is not open for this campaign.');
-            }
+        $token = $params['token'] ?? null;
+        if (!$token) {
+            throw new \InvalidArgumentException('Token is required.');
         }
 
-        if (!isset($params['request_id'])) {
-            throw new \InvalidArgumentException('Request ID is required for updating a request.');
+        $body = [];
+        if (!empty($params['contact'])) {
+            $body['contact'] = $params['contact'];
+        }
+        if (!empty($params['data'])) {
+            $body['data'] = $params['data'];
         }
 
-        $request = $this->requestRepository->findById($params['request_id']);
-        if (!$request) {
-            throw new \Exception('Request not found.');
-        }
-
-        if ($request->token !== $params['token']) {
-            throw new \Exception('Invalid token for the request.');
-        }
-
-        $request = $this->requestRepository->update($params['request_id'], [
-            'status' => 'pending',
-            'firstname' => $params['contact']['firstname'] ?? null,
-            'lastname' => $params['contact']['lastname'] ?? null,
-            'email' => $params['contact']['email'] ?? null,
-            'phone' => $params['contact']['phone'] ?? null,
-            'data' => $params['data'] ?? [],
-            'campaign_id' => $campaignId,
+        $res = $this->client->put('/membership/campaigns/' . $campaignId . '/requests/' . $requestId, [
+            'query' => ['token' => $token],
+            'json' => $body
         ]);
 
-        $this->requestLogRepository->insert([
-            'request_id' => $request->id,
-            'status' => 'pending',
-            'changed_at' => time(),
-            'changed_by' => null,
-        ]);
+        $response = json_decode($res->getBody()->getContents(), true);
 
-        if ($this->sendConfirmationEmail($campaign, $request) === false) {
-            throw new \Exception('Failed to send confirmation email.');
-        }
-
-        if ($this->sendNewRequestEmail($campaign, $request) === false) {
-            throw new \Exception('Failed to send new request email.');
-        }
-
-        return [
-            'request_id' => $request->id,
-        ];
+        return $response;
     }
 
     private function buildEditUrl($campaign, $request): string
